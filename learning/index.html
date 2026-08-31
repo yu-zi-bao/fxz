@@ -21,12 +21,14 @@
         .back-btn { display: block; text-align: center; margin-top: 20px; text-decoration: none; color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; }
         .loading { text-align: center; padding: 20px; opacity: 0.8; }
         .user-points { text-align: center; font-size: 20px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; }
+        .error-box { background: rgba(255,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎓 学习管理打卡平台</h1>
         <div id="loading" class="loading">⏳ 正在连接云端数据...</div>
+        <div id="error" class="error-box" style="display:none;"></div>
         
         <div id="content" style="display: none;">
             <div class="user-points">当前积分：<span id="currentPoints">0</span> 💰</div>
@@ -63,26 +65,43 @@
 
     <script>
         // Gitee 云端配置
-        const GITEE_USER = 'yusunhui'; // 余孙辉
+        const GITEE_USER = 'yusunhui';
         const GITEE_REPO = 'h5-data';
-        const GITEE_TOKEN = '1a6701f6571e1ca462ac27797581399b';
+        const GITEE_TOKEN = '18856f72ca16a956d0adfec9e3b2245e';
         const GITEE_FILE_LEARNING = 'data/learning.json';
         const GITEE_API = 'https://gitee.com/api/v5/repos';
+        let BRANCH = 'master';
 
         let appData = { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
+
+        // 获取仓库默认分支
+        async function getBranch() {
+            try {
+                const res = await fetch(`${GITEE_API}/${GITEE_USER}/${GITEE_REPO}`, {
+                    headers: { 'Authorization': `token ${GITEE_TOKEN}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    return data.default_branch || 'master';
+                }
+            } catch(e) {}
+            return 'master';
+        }
 
         // 读取云端数据
         async function loadFromCloud() {
             try {
-                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_LEARNING}`;
+                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_LEARNING}?ref=${BRANCH}`;
                 const res = await fetch(url, {
                     headers: { 'Authorization': `token ${GITEE_TOKEN}` }
                 });
-                if (!res.ok) return { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
+                if (!res.ok) {
+                    throw new Error(`API 返回 ${res.status}: ${res.statusText}`);
+                }
                 const data = await res.json();
                 return JSON.parse(atob(data.content)) || { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
             } catch(e) {
-                console.error('加载失败', e);
+                showError('加载云端数据失败：' + e.message);
                 return { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
             }
         }
@@ -91,26 +110,40 @@
         async function saveToCloud(data) {
             try {
                 const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_LEARNING}`;
-                await fetch(url, {
+                const body = {
+                    content: btoa(JSON.stringify(data, null, 2)),
+                    message: '更新学习管理数据：' + new Date().toLocaleString(),
+                    branch: BRANCH
+                };
+                const res = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GITEE_TOKEN}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        content: btoa(JSON.stringify(data, null, 2)),
-                        message: '更新学习管理数据',
-                        branch: 'master'
-                    })
+                    body: JSON.stringify(body)
                 });
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.message || `API 返回 ${res.status}`);
+                }
             } catch(e) {
-                console.error('保存失败', e);
-                alert('保存失败，请稍后重试');
+                showError('保存失败：' + e.message);
             }
+        }
+
+        // 显示错误
+        function showError(msg) {
+            const el = document.getElementById('error');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
         }
 
         // 初始化
         async function init() {
+            BRANCH = await getBranch();
             appData = await loadFromCloud();
             render();
             document.getElementById('loading').style.display = 'none';
@@ -122,7 +155,6 @@
             const points = appData.tasks.reduce((sum, t) => sum + (t.done ? (t.points || 0) : 0), 0);
             document.getElementById('currentPoints').textContent = points;
 
-            // 作业列表
             document.getElementById('jobList').innerHTML = appData.tasks.filter(t => t.type === 'job').map(t => `
                 <div class="task-item card">
                     <div class="task-desc">📝 ${escapeHtml(t.name)}</div>
@@ -130,7 +162,6 @@
                 </div>
             `).join('') || '<div style="opacity:0.6; text-align:center">暂无作业</div>';
 
-            // 任务配置列表
             document.getElementById('taskConfigList').innerHTML = appData.tasksConfig.map(t => `
                 <div class="task-item card">
                     <div class="task-desc">🎯 ${escapeHtml(t.name)} (+${t.points}分)</div>
@@ -138,7 +169,6 @@
                 </div>
             `).join('');
 
-            // 今日打卡
             const today = new Date().toDateString();
             document.getElementById('taskList').innerHTML = appData.tasksConfig.map(cfg => {
                 const existing = appData.tasks.find(t => t.name === cfg.name && t.date === today && t.type === 'task');
@@ -151,7 +181,6 @@
                 `;
             }).join('') || '<div style="opacity:0.6; text-align:center">请先配置任务</div>';
 
-            // 奖品列表
             document.getElementById('rewardList').innerHTML = appData.pointsConfig.map(r => `
                 <div class="task-item card">
                     <div class="task-desc">🎁 ${escapeHtml(r.name)} <span class="points">(${r.cost}分)</span></div>
@@ -161,7 +190,6 @@
             `).join('');
         }
 
-        // 添加作业
         async function addJob() {
             const title = document.getElementById('jobTitle').value.trim();
             if (!title) { alert('请输入作业内容'); return; }
@@ -171,7 +199,6 @@
             render();
         }
 
-        // 添加任务配置
         async function addTaskConfig() {
             const name = document.getElementById('taskName').value.trim();
             const points = parseInt(document.getElementById('taskPoints').value) || 10;
@@ -183,7 +210,6 @@
             render();
         }
 
-        // 打卡
         async function checkTask(name, points) {
             const today = new Date().toDateString();
             const existing = appData.tasks.find(t => t.name === name && t.date === today && t.type === 'task');
@@ -196,7 +222,6 @@
             render();
         }
 
-        // 添加奖品
         async function addReward() {
             const name = document.getElementById('rewardName').value.trim();
             const cost = parseInt(document.getElementById('rewardCost').value);
@@ -208,15 +233,11 @@
             render();
         }
 
-        // 兑换奖品
         async function redeemReward(name, cost) {
             const current = appData.tasks.reduce((sum, t) => sum + (t.done ? (t.points || 0) : 0), 0);
             if (current < cost) { alert('积分不足！'); return; }
             if (!confirm(`确认兑换 ${name} 吗？将扣除 ${cost} 分`)) return;
-            
             appData.pointsLog.push({ date: new Date().toLocaleString(), reward: name, cost: cost });
-            
-            // 扣减积分（撤销打卡）
             let toDeduct = cost;
             for (let i = appData.tasks.length - 1; i >= 0; i--) {
                 if (appData.tasks[i].done && appData.tasks[i].type === 'task') {
@@ -229,12 +250,10 @@
             render();
         }
 
-        // 删除函数
         async function deleteItem(id) { appData.tasks = appData.tasks.filter(t => t.id !== id); await saveToCloud(appData); render(); }
         async function deleteConfig(id) { appData.tasksConfig = appData.tasksConfig.filter(t => t.id !== id); await saveToCloud(appData); render(); }
         async function deleteReward(id) { appData.pointsConfig = appData.pointsConfig.filter(t => t.id !== id); await saveToCloud(appData); render(); }
 
-        // HTML 转义
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text || '';
