@@ -3,356 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>记事本</title>
+    <title>云端记事本</title>
     <style>
-        :root { --primary: #ffc107; --accent: #ff9800; --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: white; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        /* 顶部 */
-        .header { padding: 20px; background: rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; backdrop-filter: blur(10px); }
-        .header h1 { margin: 0; font-size: 22px; }
-        .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.8; }
-        .stats { display: flex; justify-content: space-around; margin-top: 15px; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 12px; }
-        .stat-item { text-align: center; }
-        .stat-num { font-size: 20px; font-weight: bold; }
-        .stat-label { font-size: 11px; opacity: 0.8; }
-
-        /* 容器 */
-        .container { padding: 15px; flex: 1; overflow-y: auto; }
-        
-        /* 搜索栏 */
-        .search-box { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 10px 15px; margin-bottom: 15px; display: flex; align-items: center; }
-        .search-box input { background: transparent; border: none; color: white; flex: 1; outline: none; font-size: 14px; }
-        .search-box input::placeholder { color: rgba(255,255,255,0.6); }
-        .search-icon { font-size: 18px; margin-right: 8px; }
-
-        /* 笔记卡片 */
-        .note-card { background: rgba(255,255,255,0.95); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #333; position: relative; transition: transform 0.2s; }
-        .note-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
-        .note-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #2c3e50; }
-        .note-content { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap; word-break: break-word; }
-        .note-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #999; }
-        .note-actions { display: flex; gap: 8px; }
-        .btn-action { border: none; background: none; cursor: pointer; font-size: 16px; padding: 5px; border-radius: 5px; transition: background 0.2s; }
-        .btn-action:hover { background: rgba(0,0,0,0.1); }
-        .btn-delete { color: #e74c3c; }
-        .btn-edit { color: #3498db; }
-
-        /* 空状态 */
-        .empty-state { text-align: center; padding: 60px 20px; }
-        .empty-icon { font-size: 60px; margin-bottom: 15px; }
-        .empty-text { font-size: 14px; opacity: 0.8; }
-
-        /* 底部浮动按钮 */
-        .fab { position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; background: var(--primary); color: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; box-shadow: 0 4px 15px rgba(255,193,7,0.4); cursor: pointer; transition: transform 0.2s; z-index: 50; }
-        .fab:hover { transform: scale(1.1); }
-
-        /* 底部导航 */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 40; }
-        .nav-item { text-align: center; font-size: 12px; color: #999; cursor: pointer; padding: 5px; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
-
-        /* 弹窗 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; align-items: flex-end; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 20px; max-height: 80vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-header h3 { margin: 0; color: #333; }
-        .btn-close { background: none; border: none; font-size: 24px; color: #999; cursor: pointer; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; font-weight: 500; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; font-family: inherit; }
-        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
-        .form-group textarea { min-height: 150px; resize: vertical; }
-        .btn-save { width: 100%; padding: 14px; background: var(--primary); color: #333; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
-        .btn-save:hover { background: var(--accent); }
-        .btn-delete-confirm { width: 100%; padding: 14px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 20px; color: var(--accent); }
+        body { margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+        .container { width: 95%; max-width: 600px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        h1 { text-align: center; margin-bottom: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: none; outline: none; background: rgba(255,255,255,0.9); margin-bottom: 10px; box-sizing: border-box; }
+        button { padding: 10px 15px; border-radius: 8px; border: none; background: #ff7e5f; color: white; cursor: pointer; font-weight: bold; }
+        .note-card { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .note-title { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
+        .note-date { font-size: 12px; opacity: 0.7; margin-bottom: 10px; }
+        .note-content { font-size: 14px; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
+        .note-actions { text-align: right; }
+        .btn-delete { background: #ff4757; font-size: 12px; padding: 5px 10px; }
+        .back-btn { display: block; text-align: center; margin-top: 20px; text-decoration: none; color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; }
+        .loading { text-align: center; padding: 20px; opacity: 0.8; }
     </style>
 </head>
 <body>
-
-    <div class="loading" id="loading">正在同步云端数据...</div>
-
-    <div class="header">
-        <h1>📝 记事本</h1>
-        <p>记录每一个灵感与想法</p>
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-num" id="noteCount">0</div>
-                <div class="stat-label">笔记总数</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num" id="todayCount">0</div>
-                <div class="stat-label">今日新增</div>
-            </div>
-        </div>
-    </div>
-
     <div class="container">
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="搜索笔记..." oninput="searchNotes()">
-        </div>
-        <div id="noteList"></div>
-    </div>
-
-    <div class="fab" onclick="openModal()">+</div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="goBack()">
-            <span class="nav-icon">🏠</span>首页
-        </div>
-    </div>
-
-    <!-- 新增/编辑弹窗 -->
-    <div class="modal" id="noteModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">新增笔记</h3>
-                <button class="btn-close" onclick="closeModal()">×</button>
-            </div>
-            <div class="form-group">
-                <label>标题</label>
-                <input type="text" id="noteTitle" placeholder="请输入笔记标题">
-            </div>
-            <div class="form-group">
-                <label>内容</label>
-                <textarea id="noteContent" placeholder="请输入笔记内容..."></textarea>
-            </div>
-            <button class="btn-save" onclick="saveNote()">保存笔记</button>
-            <button class="btn-delete-confirm" id="deleteBtn" style="display:none;" onclick="deleteNote()">删除笔记</button>
-        </div>
-    </div>
-
-<script>
-    // ==========================================
-    // 【核心配置】填入和上面一样的 JSONBin 信息
-    // ==========================================
-    const CLOUD_CONFIG = {
-        BIN_URL: '请在此处填入BIN_URL', 
-        API_KEY: '请在此处填入API_KEY'
-    };
-
-    let notes = [];
-    let editingId = null;
-
-    // --- 云端同步核心函数 (同上) ---
-    async function getCloudData() {
-        try {
-            const res = await fetch(CLOUD_CONFIG.BIN_URL, {
-                headers: { 'X-Master-Key': CLOUD_CONFIG.API_KEY }
-            });
-            const json = await res.json();
-            return json.record;
-        } catch (e) {
-            alert('云端读取失败');
-            return null;
-        }
-    }
-
-    async function saveCloudData(fullData) {
-        try {
-            await fetch(CLOUD_CONFIG.BIN_URL, {
-                method: 'PUT',
-                headers: {
-                    'X-Master-Key': CLOUD_CONFIG.API_KEY,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(fullData)
-            });
-        } catch (e) {
-            alert('云端保存失败');
-        }
-    }
-
-    // --- 初始化 ---
-    async function init() {
-        const fullData = await getCloudData();
-        if (fullData && fullData.notepad) {
-            notes = fullData.notepad;
-        }
-        document.getElementById('loading').style.display = 'none';
-        updateStats();
-        renderNotes();
-    }
-
-    function updateStats() {
-        document.getElementById('noteCount').innerText = notes.length;
-        const today = new Date().toDateString();
-        const todayNotes = notes.filter(n => new Date(n.createdAt).toDateString() === today);
-        document.getElementById('todayCount').innerText = todayNotes.length;
-    }
-
-    function renderNotes(filteredNotes = null) {
-        const list = document.getElementById('noteList');
-        const displayNotes = filteredNotes || notes;
+        <h1>📝 云端记事本</h1>
+        <div id="loading" class="loading">⏳ 正在加载云端数据...</div>
         
-        if (displayNotes.length === 0) {
-            list.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📝</div>
-                    <div class="empty-text">${filteredNotes ? '没有找到匹配的笔记' : '还没有笔记，点击右上角 + 开始记录吧！'}</div>
-                </div>`;
-            return;
+        <div id="content" style="display: none;">
+            <div class="input-group">
+                <input type="text" id="noteTitle" placeholder="标题...">
+                <textarea id="noteContent" rows="3" placeholder="内容..."></textarea>
+                <button onclick="addNote()">保存到云端</button>
+            </div>
+            <div id="notesList"></div>
+            <a href="https://yu-zi-bao.github.io/fxz/" class="back-btn">🏠 返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            TOKEN: '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',
+            REPO: 'yu-zi-bao/fxz',
+            BRANCH: 'main', 
+            FILE: 'data/notepad.json'
+        };
+
+        let notes = [];
+
+        async function syncNotes(action, data) {
+            const url = `https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}?ref=${CONFIG.BRANCH}`;
+            const headers = { 'Authorization': `token ${CONFIG.TOKEN}`, 'Accept': 'application/vnd.github.v3+json' };
+            if (action === 'read') {
+                try {
+                    const res = await fetch(url, { headers });
+                    if (!res.ok) return null;
+                    const json = await res.json();
+                    return JSON.parse(atob(json.content.split('\n')[0])).notes;
+                } catch(e) { return null; }
+            } else {
+                try {
+                    const getRes = await fetch(url, { headers });
+                    const meta = await getRes.json();
+                    await fetch(`https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}`, {
+                        method: 'PUT',
+                        headers: { ...headers, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: 'Update Note',
+                            branch: CONFIG.BRANCH,
+                            sha: meta.sha,
+                            content: btoa(JSON.stringify({ notes: data }, null, 2))
+                        })
+                    });
+                } catch(e) { console.error(e); }
+            }
         }
 
-        const sorted = [...displayNotes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        list.innerHTML = sorted.map(note => `
-            <div class="note-card" onclick="openModal(${note.id})">
-                <div class="note-title">${escapeHtml(note.title)}</div>
-                <div class="note-content">${escapeHtml(note.content)}</div>
-                <div class="note-footer">
-                    <span>${formatDate(note.createdAt)}</span>
-                    <div class="note-actions">
-                        <button class="btn-action btn-edit" onclick="event.stopPropagation(); openModal(${note.id})">✏️</button>
-                        <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNoteDirect(${note.id})">🗑️</button>
-                    </div>
+        async function init() {
+            notes = await syncNotes('read') || [];
+            render();
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        function render() {
+            const html = notes.sort((a,b) => b.time - a.time).map(n => `
+                <div class="note-card">
+                    <div class="note-title">${n.title}</div>
+                    <div class="note-date">${new Date(n.time).toLocaleString()}</div>
+                    <div class="note-content">${n.content}</div>
+                    <div class="note-actions"><button class="btn-delete" onclick="deleteNote('${n.id}')">删除</button></div>
                 </div>
-            </div>
-        `).join('');
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function formatDate(dateStr) {
-        const date = new Date(dateStr);
-        const now = new Date();
-        const diff = now - date;
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
-        if (days === 0) {
-            return '今天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
-        } else if (days === 1) {
-            return '昨天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
-        } else if (days < 7) {
-            return `${days}天前`;
-        } else {
-            return date.toLocaleDateString('zh-CN');
+            `).join('');
+            document.getElementById('notesList').innerHTML = html || '<div style="text-align:center; opacity:0.6">暂无笔记</div>';
         }
-    }
 
-    function openModal(id = null) {
-        editingId = id;
-        const modal = document.getElementById('noteModal');
-        const title = document.getElementById('modalTitle');
-        const titleInput = document.getElementById('noteTitle');
-        const contentInput = document.getElementById('noteContent');
-        const deleteBtn = document.getElementById('deleteBtn');
-        
-        if (id) {
-            const note = notes.find(n => n.id === id);
-            title.innerText = '编辑笔记';
-            titleInput.value = note.title;
-            contentInput.value = note.content;
-            deleteBtn.style.display = 'block';
-        } else {
-            title.innerText = '新增笔记';
-            titleInput.value = '';
-            contentInput.value = '';
-            deleteBtn.style.display = 'none';
+        async function addNote() {
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('noteContent').value;
+            if (!title) return;
+            notes.push({ id: Date.now().toString(), title, content, time: Date.now() });
+            await syncNotes('write', notes);
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            render();
         }
-        
-        modal.classList.add('active');
-        titleInput.focus();
-    }
 
-    function closeModal() {
-        document.getElementById('noteModal').classList.remove('active');
-        editingId = null;
-    }
-
-    async function saveNote() {
-        const title = document.getElementById('noteTitle').value.trim();
-        const content = document.getElementById('noteContent').value.trim();
-        
-        if (!title && !content) {
-            alert('标题和内容不能同时为空');
-            return;
-        }
-        
-        if (editingId) {
-            const note = notes.find(n => n.id === editingId);
-            note.title = title || '无标题';
-            note.content = content;
-            note.updatedAt = new Date().toISOString();
-        } else {
-            notes.push({
-                id: Date.now(),
-                title: title || '无标题',
-                content: content,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            });
-        }
-        
-        const fullData = await getCloudData();
-        if (fullData) {
-            fullData.notepad = notes;
-            await saveCloudData(fullData);
-        }
-        
-        updateStats();
-        renderNotes();
-        closeModal();
-    }
-
-    async function deleteNoteDirect(id) {
-        if (confirm('确定要删除这条笔记吗？')) {
+        async function deleteNote(id) {
+            if (!confirm('确认删除？')) return;
             notes = notes.filter(n => n.id !== id);
-            const fullData = await getCloudData();
-            if (fullData) {
-                fullData.notepad = notes;
-                await saveCloudData(fullData);
-            }
-            updateStats();
-            renderNotes();
+            await syncNotes('write', notes);
+            render();
         }
-    }
 
-    async function deleteNote() {
-        if (editingId && confirm('确定要删除这条笔记吗？')) {
-            notes = notes.filter(n => n.id !== editingId);
-            const fullData = await getCloudData();
-            if (fullData) {
-                fullData.notepad = notes;
-                await saveCloudData(fullData);
-            }
-            updateStats();
-            renderNotes();
-            closeModal();
-        }
-    }
-
-    function searchNotes() {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        if (!query) {
-            renderNotes();
-            return;
-        }
-        const filtered = notes.filter(n => 
-            n.title.toLowerCase().includes(query) || 
-            n.content.toLowerCase().includes(query)
-        );
-        renderNotes(filtered);
-    }
-
-    function goBack() {
-        window.location.href = 'https://yu-zi-bao.github.io/fxz/index.html';
-    }
-
-    document.getElementById('noteModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-
-    // 启动
-    init();
-</script>
+        init();
+    </script>
 </body>
 </html>
