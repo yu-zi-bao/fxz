@@ -19,12 +19,14 @@
         .btn-delete { background: #ff4757; font-size: 12px; padding: 5px 10px; }
         .back-btn { display: block; text-align: center; margin-top: 20px; text-decoration: none; color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; }
         .loading { text-align: center; padding: 20px; opacity: 0.8; }
+        .error-box { background: rgba(255,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📝 云端记事本</h1>
-        <div id="loading" class="loading">⏳ 正在加载云端数据...</div>
+        <div id="loading" class="loading">⏳ 正在连接云端数据...</div>
+        <div id="error" class="error-box" style="display:none;"></div>
         
         <div id="content" style="display: none;">
             <div class="input-group">
@@ -39,26 +41,44 @@
 
     <script>
         // Gitee 云端配置
-        const GITEE_USER = 'yusunhui'; // 余孙辉
+        const GITEE_USER = 'yusunhui';
         const GITEE_REPO = 'h5-data';
-        const GITEE_TOKEN = '1a6701f6571e1ca462ac27797581399b';
+        const GITEE_TOKEN = '18856f72ca16a956d0adfec9e3b2245e';
         const GITEE_FILE_NOTEPAD = 'data/notepad.json';
         const GITEE_API = 'https://gitee.com/api/v5/repos';
+        let BRANCH = 'master';
 
         let notes = [];
+
+        // 获取仓库默认分支
+        async function getBranch() {
+            try {
+                const res = await fetch(`${GITEE_API}/${GITEE_USER}/${GITEE_REPO}`, {
+                    headers: { 'Authorization': `token ${GITEE_TOKEN}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    return data.default_branch || 'master';
+                }
+            } catch(e) {}
+            return 'master';
+        }
 
         // 读取云端数据
         async function loadFromCloud() {
             try {
-                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}`;
+                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}?ref=${BRANCH}`;
                 const res = await fetch(url, {
                     headers: { 'Authorization': `token ${GITEE_TOKEN}` }
                 });
-                if (!res.ok) return [];
+                if (!res.ok) {
+                    throw new Error(`API 返回 ${res.status}: ${res.statusText}`);
+                }
                 const data = await res.json();
-                return JSON.parse(atob(data.content)).notes || [];
+                const decoded = JSON.parse(atob(data.content));
+                return decoded.notes || [];
             } catch(e) {
-                console.error('加载失败', e);
+                showError('加载云端数据失败：' + e.message);
                 return [];
             }
         }
@@ -67,26 +87,40 @@
         async function saveToCloud(data) {
             try {
                 const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}`;
-                await fetch(url, {
+                const body = {
+                    content: btoa(JSON.stringify({ notes: data })),
+                    message: '更新记事本：' + new Date().toLocaleString(),
+                    branch: BRANCH
+                };
+                const res = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GITEE_TOKEN}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        content: btoa(JSON.stringify({ notes: data })),
-                        message: '更新记事本',
-                        branch: 'master'
-                    })
+                    body: JSON.stringify(body)
                 });
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.message || `API 返回 ${res.status}`);
+                }
             } catch(e) {
-                console.error('保存失败', e);
-                alert('保存失败，请稍后重试');
+                showError('保存失败：' + e.message);
             }
+        }
+
+        // 显示错误
+        function showError(msg) {
+            const el = document.getElementById('error');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
         }
 
         // 初始化
         async function init() {
+            BRANCH = await getBranch();
             notes = await loadFromCloud();
             render();
             document.getElementById('loading').style.display = 'none';
@@ -103,7 +137,7 @@
                     <div class="note-actions"><button class="btn-delete" onclick="deleteNote('${n.id}')">删除</button></div>
                 </div>
             `).join('');
-            document.getElementById('notesList').innerHTML = html || '<div style="text-align:center; opacity:0.6">暂无笔记</div>';
+            document.getElementById('notesList').innerHTML = html || '<div style="text-align:center; opacity:0.6">暂无笔记，请先添加</div>';
         }
 
         // 添加笔记
