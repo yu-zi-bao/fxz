@@ -38,78 +38,91 @@
     </div>
 
     <script>
-        const CONFIG = {
-            TOKEN: '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',
-            REPO: 'yu-zi-bao/fxz',
-            BRANCH: 'main', 
-            FILE: 'data/notepad.json'
+        // JSONBin.io 云端配置
+        const BIN_ID = '6a95418bda38895dfe256735';
+        const MASTER_KEY = '$2a$10$37Tyl/qtLzIkc1MXWqSq1efafrPme5N2wefD99TMmCs46IjyF7tVW';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        const HEADERS = {
+            '$masterKey': MASTER_KEY,
+            'Content-Type': 'application/json'
         };
 
         let notes = [];
 
-        async function syncNotes(action, data) {
-            const url = `https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}?ref=${CONFIG.BRANCH}`;
-            const headers = { 'Authorization': `token ${CONFIG.TOKEN}`, 'Accept': 'application/vnd.github.v3+json' };
-            if (action === 'read') {
-                try {
-                    const res = await fetch(url, { headers });
-                    if (!res.ok) return null;
-                    const json = await res.json();
-                    return JSON.parse(atob(json.content.split('\n')[0])).notes;
-                } catch(e) { return null; }
-            } else {
-                try {
-                    const getRes = await fetch(url, { headers });
-                    const meta = await getRes.json();
-                    await fetch(`https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}`, {
-                        method: 'PUT',
-                        headers: { ...headers, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            message: 'Update Note',
-                            branch: CONFIG.BRANCH,
-                            sha: meta.sha,
-                            content: btoa(JSON.stringify({ notes: data }, null, 2))
-                        })
-                    });
-                } catch(e) { console.error(e); }
+        // 读取云端数据
+        async function loadFromCloud() {
+            try {
+                const res = await fetch(`${API_URL}/latest`, { headers: HEADERS });
+                const data = await res.json();
+                return data.record.notes || [];
+            } catch(e) {
+                console.error('加载失败', e);
+                return [];
             }
         }
 
+        // 写入云端数据
+        async function saveToCloud(data) {
+            try {
+                await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: HEADERS,
+                    body: JSON.stringify({ notes: data })
+                });
+            } catch(e) {
+                console.error('保存失败', e);
+                alert('保存失败，请稍后重试');
+            }
+        }
+
+        // 初始化
         async function init() {
-            notes = await syncNotes('read') || [];
+            notes = await loadFromCloud();
             render();
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
         }
 
+        // 渲染列表
         function render() {
             const html = notes.sort((a,b) => b.time - a.time).map(n => `
                 <div class="note-card">
-                    <div class="note-title">${n.title}</div>
+                    <div class="note-title">${escapeHtml(n.title)}</div>
                     <div class="note-date">${new Date(n.time).toLocaleString()}</div>
-                    <div class="note-content">${n.content}</div>
+                    <div class="note-content">${escapeHtml(n.content)}</div>
                     <div class="note-actions"><button class="btn-delete" onclick="deleteNote('${n.id}')">删除</button></div>
                 </div>
             `).join('');
             document.getElementById('notesList').innerHTML = html || '<div style="text-align:center; opacity:0.6">暂无笔记</div>';
         }
 
+        // 添加笔记
         async function addNote() {
-            const title = document.getElementById('noteTitle').value;
-            const content = document.getElementById('noteContent').value;
-            if (!title) return;
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+            if (!title) { alert('请输入标题'); return; }
+            
             notes.push({ id: Date.now().toString(), title, content, time: Date.now() });
-            await syncNotes('write', notes);
+            await saveToCloud(notes);
+            
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteContent').value = '';
             render();
         }
 
+        // 删除笔记
         async function deleteNote(id) {
             if (!confirm('确认删除？')) return;
             notes = notes.filter(n => n.id !== id);
-            await syncNotes('write', notes);
+            await saveToCloud(notes);
             render();
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         init();
