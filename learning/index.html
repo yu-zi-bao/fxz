@@ -62,23 +62,25 @@
     </div>
 
     <script>
-        // JSONBin.io 云端配置
-        const BIN_ID = '6a9549aef5f4af5e2957104e';
-        const MASTER_KEY = '$2a$10$3Y8Qx4mwT5aKis/b.SFn4O6pWW43WXfbD5XyzYVQ.aMYLohLkbvpy';
-        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const HEADERS = {
-            '$masterKey': MASTER_KEY,
-            'Content-Type': 'application/json'
-        };
+        // Gitee 云端配置
+        const GITEE_USER = 'yusunhui'; // 余孙辉
+        const GITEE_REPO = 'h5-data';
+        const GITEE_TOKEN = '18856f72ca16a956d0adfec9e3b2245e';
+        const GITEE_FILE_LEARNING = 'data/learning.json';
+        const GITEE_API = 'https://gitee.com/api/v5/repos';
 
         let appData = { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
 
         // 读取云端数据
         async function loadFromCloud() {
             try {
-                const res = await fetch(`${API_URL}/latest`, { headers: HEADERS });
+                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_LEARNING}`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `token ${GITEE_TOKEN}` }
+                });
+                if (!res.ok) return { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
                 const data = await res.json();
-                return data.record || { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
+                return JSON.parse(atob(data.content)) || { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
             } catch(e) {
                 console.error('加载失败', e);
                 return { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
@@ -88,10 +90,18 @@
         // 写入云端数据
         async function saveToCloud(data) {
             try {
-                await fetch(API_URL, {
+                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_LEARNING}`;
+                await fetch(url, {
                     method: 'PUT',
-                    headers: HEADERS,
-                    body: JSON.stringify(data)
+                    headers: {
+                        'Authorization': `token ${GITEE_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: btoa(JSON.stringify(data, null, 2)),
+                        message: '更新学习管理数据',
+                        branch: 'master'
+                    })
                 });
             } catch(e) {
                 console.error('保存失败', e);
