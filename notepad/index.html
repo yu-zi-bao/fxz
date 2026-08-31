@@ -5,18 +5,304 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>记事本</title>
     <style>
-        body { margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .content { text-align: center; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18); width: 90%; max-width: 400px; }
-        h1 { margin-bottom: 10px; }
-        p { opacity: 0.9; margin-bottom: 20px; }
-        .btn { background: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; padding: 10px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.3); }
+        :root { --primary: #ffc107; --accent: #ff9800; --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: white; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* 顶部 */
+        .header { padding: 20px; background: rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; backdrop-filter: blur(10px); }
+        .header h1 { margin: 0; font-size: 22px; }
+        .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.8; }
+        .stats { display: flex; justify-content: space-around; margin-top: 15px; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 12px; }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 20px; font-weight: bold; }
+        .stat-label { font-size: 11px; opacity: 0.8; }
+
+        /* 容器 */
+        .container { padding: 15px; flex: 1; overflow-y: auto; }
+        
+        /* 搜索栏 */
+        .search-box { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 10px 15px; margin-bottom: 15px; display: flex; align-items: center; }
+        .search-box input { background: transparent; border: none; color: white; flex: 1; outline: none; font-size: 14px; }
+        .search-box input::placeholder { color: rgba(255,255,255,0.6); }
+        .search-icon { font-size: 18px; margin-right: 8px; }
+
+        /* 笔记卡片 */
+        .note-card { background: rgba(255,255,255,0.95); border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #333; position: relative; transition: transform 0.2s; }
+        .note-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .note-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #2c3e50; }
+        .note-content { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap; word-break: break-word; }
+        .note-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #999; }
+        .note-actions { display: flex; gap: 8px; }
+        .btn-action { border: none; background: none; cursor: pointer; font-size: 16px; padding: 5px; border-radius: 5px; transition: background 0.2s; }
+        .btn-action:hover { background: rgba(0,0,0,0.1); }
+        .btn-delete { color: #e74c3c; }
+        .btn-edit { color: #3498db; }
+
+        /* 空状态 */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 60px; margin-bottom: 15px; }
+        .empty-text { font-size: 14px; opacity: 0.8; }
+
+        /* 底部浮动按钮 */
+        .fab { position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; background: var(--primary); color: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; box-shadow: 0 4px 15px rgba(255,193,7,0.4); cursor: pointer; transition: transform 0.2s; z-index: 50; }
+        .fab:hover { transform: scale(1.1); }
+
+        /* 底部导航 */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 40; }
+        .nav-item { text-align: center; font-size: 12px; color: #999; cursor: pointer; padding: 5px; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+        /* 弹窗 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; align-items: flex-end; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 20px; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h3 { margin: 0; color: #333; }
+        .btn-close { background: none; border: none; font-size: 24px; color: #999; cursor: pointer; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+        .form-group textarea { min-height: 150px; resize: vertical; }
+        .btn-save { width: 100%; padding: 14px; background: var(--primary); color: #333; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .btn-save:hover { background: var(--accent); }
+        .btn-delete-confirm { width: 100%; padding: 14px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="content">
+
+    <div class="header">
         <h1>📝 记事本</h1>
-        <p>🚧 功能建设中，敬请期待...</p>
-        <a href="https://yu-zi-bao.github.io/fxz/index.html" class="btn">← 返回首页</a>
+        <p>记录每一个灵感与想法</p>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-num" id="noteCount">0</div>
+                <div class="stat-label">笔记总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="todayCount">0</div>
+                <div class="stat-label">今日新增</div>
+            </div>
+        </div>
     </div>
+
+    <div class="container">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="搜索笔记..." oninput="searchNotes()">
+        </div>
+        <div id="noteList"></div>
+    </div>
+
+    <div class="fab" onclick="openModal()">+</div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="goBack()">
+            <span class="nav-icon">🏠</span>首页
+        </div>
+    </div>
+
+    <!-- 新增/编辑弹窗 -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">新增笔记</h3>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>标题</label>
+                <input type="text" id="noteTitle" placeholder="请输入笔记标题">
+            </div>
+            <div class="form-group">
+                <label>内容</label>
+                <textarea id="noteContent" placeholder="请输入笔记内容..."></textarea>
+            </div>
+            <button class="btn-save" onclick="saveNote()">保存笔记</button>
+            <button class="btn-delete-confirm" id="deleteBtn" style="display:none;" onclick="deleteNote()">删除笔记</button>
+        </div>
+    </div>
+
+<script>
+const DB_KEY = 'xiaoyu_notebook_db';
+let notes = [];
+let editingId = null;
+
+function init() {
+    const saved = localStorage.getItem(DB_KEY);
+    if (saved) {
+        notes = JSON.parse(saved);
+    }
+    updateStats();
+    renderNotes();
+}
+
+function updateStats() {
+    document.getElementById('noteCount').innerText = notes.length;
+    const today = new Date().toDateString();
+    const todayNotes = notes.filter(n => new Date(n.createdAt).toDateString() === today);
+    document.getElementById('todayCount').innerText = todayNotes.length;
+}
+
+function renderNotes(filteredNotes = null) {
+    const list = document.getElementById('noteList');
+    const displayNotes = filteredNotes || notes;
+    
+    if (displayNotes.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <div class="empty-text">${filteredNotes ? '没有找到匹配的笔记' : '还没有笔记，点击右上角 + 开始记录吧！'}</div>
+            </div>`;
+        return;
+    }
+
+    // 按创建时间倒序
+    const sorted = [...displayNotes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    list.innerHTML = sorted.map(note => `
+        <div class="note-card" onclick="openModal(${note.id})">
+            <div class="note-title">${escapeHtml(note.title)}</div>
+            <div class="note-content">${escapeHtml(note.content)}</div>
+            <div class="note-footer">
+                <span>${formatDate(note.createdAt)}</span>
+                <div class="note-actions">
+                    <button class="btn-action btn-edit" onclick="event.stopPropagation(); openModal(${note.id})">✏️</button>
+                    <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNoteDirect(${note.id})">🗑️</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) {
+        return '今天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+    } else if (days === 1) {
+        return '昨天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+    } else if (days < 7) {
+        return `${days}天前`;
+    } else {
+        return date.toLocaleDateString('zh-CN');
+    }
+}
+
+function openModal(id = null) {
+    editingId = id;
+    const modal = document.getElementById('noteModal');
+    const title = document.getElementById('modalTitle');
+    const titleInput = document.getElementById('noteTitle');
+    const contentInput = document.getElementById('noteContent');
+    const deleteBtn = document.getElementById('deleteBtn');
+    
+    if (id) {
+        const note = notes.find(n => n.id === id);
+        title.innerText = '编辑笔记';
+        titleInput.value = note.title;
+        contentInput.value = note.content;
+        deleteBtn.style.display = 'block';
+    } else {
+        title.innerText = '新增笔记';
+        titleInput.value = '';
+        contentInput.value = '';
+        deleteBtn.style.display = 'none';
+    }
+    
+    modal.classList.add('active');
+    titleInput.focus();
+}
+
+function closeModal() {
+    document.getElementById('noteModal').classList.remove('active');
+    editingId = null;
+}
+
+function saveNote() {
+    const title = document.getElementById('noteTitle').value.trim();
+    const content = document.getElementById('noteContent').value.trim();
+    
+    if (!title && !content) {
+        alert('标题和内容不能同时为空');
+        return;
+    }
+    
+    if (editingId) {
+        // 编辑模式
+        const note = notes.find(n => n.id === editingId);
+        note.title = title || '无标题';
+        note.content = content;
+        note.updatedAt = new Date().toISOString();
+    } else {
+        // 新增模式
+        notes.push({
+            id: Date.now(),
+            title: title || '无标题',
+            content: content,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+    }
+    
+    localStorage.setItem(DB_KEY, JSON.stringify(notes));
+    updateStats();
+    renderNotes();
+    closeModal();
+}
+
+function deleteNoteDirect(id) {
+    if (confirm('确定要删除这条笔记吗？')) {
+        notes = notes.filter(n => n.id !== id);
+        localStorage.setItem(DB_KEY, JSON.stringify(notes));
+        updateStats();
+        renderNotes();
+    }
+}
+
+function deleteNote() {
+    if (editingId && confirm('确定要删除这条笔记吗？')) {
+        notes = notes.filter(n => n.id !== editingId);
+        localStorage.setItem(DB_KEY, JSON.stringify(notes));
+        updateStats();
+        renderNotes();
+        closeModal();
+    }
+}
+
+function searchNotes() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!query) {
+        renderNotes();
+        return;
+    }
+    const filtered = notes.filter(n => 
+        n.title.toLowerCase().includes(query) || 
+        n.content.toLowerCase().includes(query)
+    );
+    renderNotes(filtered);
+}
+
+function goBack() {
+    window.location.href = 'https://yu-zi-bao.github.io/fxz/';
+}
+
+// 点击弹窗外部关闭
+document.getElementById('noteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// 初始化
+init();
+</script>
 </body>
 </html>
