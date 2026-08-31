@@ -53,9 +53,14 @@
         .btn-cancel { background: #eee; color: #666; }
         .btn-reward { background: var(--accent); color: white; width: 100%; }
         .btn-del { background: #ff5252; color: white; font-size: 12px; padding: 4px 8px; margin-left: 10px; }
+        
+        /* 加载动画 */
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 20px; color: var(--primary); }
     </style>
 </head>
 <body>
+
+    <div class="loading" id="loading">正在同步云端数据...</div>
 
     <div class="header">
         <h1>🎓 学习管理平台</h1>
@@ -111,22 +116,62 @@
     </div>
 
 <script>
-    // --- 数据与状态 ---
-    const DB_KEY = 'xiaoyu_learning_db';
+    // ==========================================
+    // 【核心配置】在这里填入你的 JSONBin 信息
+    // ==========================================
+    const CLOUD_CONFIG = {
+        // 填入你在第一步获取的 Bin URL (类似 https://api.jsonbin.io/v3/b/xxxxxx)
+        BIN_URL: '请在此处填入BIN_URL', 
+        // 填入你在第一步获取的 Master Key (类似 $2a$10$xxxxxx)
+        API_KEY: '请在此处填入API_KEY'
+    };
+
     let state = {
-        role: 'child', // child or parent
-        tab: 'homework', // homework, checkin, rewards
+        role: 'child', 
+        tab: 'homework', 
         data: { homeworks: [], tasks: [], rewards: [], points: 0 }
     };
 
+    // --- 云端同步核心函数 ---
+    async function getCloudData() {
+        try {
+            const res = await fetch(CLOUD_CONFIG.BIN_URL, {
+                headers: { 'X-Master-Key': CLOUD_CONFIG.API_KEY }
+            });
+            const json = await res.json();
+            return json.record; // 返回整个云端数据库
+        } catch (e) {
+            alert('云端读取失败，请检查 Key 是否正确');
+            console.error(e);
+            return null;
+        }
+    }
+
+    async function saveCloudData(fullData) {
+        try {
+            await fetch(CLOUD_CONFIG.BIN_URL, {
+                method: 'PUT',
+                headers: {
+                    'X-Master-Key': CLOUD_CONFIG.API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(fullData)
+            });
+        } catch (e) {
+            alert('云端保存失败，请检查网络');
+            console.error(e);
+        }
+    }
+
     // --- 初始化 ---
-    function init() {
-        // 加载数据
-        const saved = localStorage.getItem(DB_KEY);
-        if (saved) {
-            state.data = JSON.parse(saved);
+    async function init() {
+        // 1. 尝试从云端读取
+        const fullData = await getCloudData();
+        
+        if (fullData && fullData.learning) {
+            state.data = fullData.learning;
         } else {
-            // 默认初始化数据
+            // 如果云端是空的，写入默认数据
             state.data.tasks = [
                 { id: Date.now(), title: '早睡早起 (22:00前睡觉)', points: 20, isCompleted: false },
                 { id: Date.now()+1, title: '主动收拾玩具', points: 10, isCompleted: false }
@@ -137,9 +182,11 @@
                 { id: Date.now()+4, title: '吃一个汉堡', cost: 80, count: 1 },
                 { id: Date.now()+5, title: '吃牛排大餐', cost: 200, count: 1 }
             ];
-            saveData();
+            // 初始写入云端
+            saveCloudData({ learning: state.data, notepad: [] });
         }
         
+        document.getElementById('loading').style.display = 'none';
         updateDate();
         render();
     }
@@ -150,12 +197,17 @@
         document.getElementById('totalPoints').innerText = state.data.points;
     }
 
-    function saveData() {
-        localStorage.setItem(DB_KEY, JSON.stringify(state.data));
+    // 云端保存逻辑
+    async function saveData() {
+        const fullData = await getCloudData();
+        if (fullData) {
+            fullData.learning = state.data; // 更新学习模块数据
+            await saveCloudData(fullData);  // 写回云端
+        }
         updateDate();
     }
 
-    // --- 渲染逻辑 ---
+    // ... (以下保持原有的渲染和交互逻辑不变) ...
     function render() {
         const container = document.getElementById('appContent');
         container.innerHTML = '';
@@ -216,7 +268,6 @@
         }
     }
 
-    // --- 交互逻辑 ---
     function switchRole(role) {
         state.role = role;
         document.getElementById('btnChild').className = role === 'child' ? 'role-btn active' : 'role-btn';
@@ -236,7 +287,6 @@
         window.location.href = 'https://yu-zi-bao.github.io/fxz/index.html';
     }
 
-    // --- 弹窗与操作 ---
     function openModal(type) {
         document.getElementById('addModal').style.display = 'flex';
         const t = document.getElementById('modalTitle');
@@ -257,7 +307,7 @@
         document.getElementById('addModal').style.display = 'none';
     }
 
-    function saveItem() {
+    async function saveItem() {
         const content = document.getElementById('inputContent').value;
         if (!content) return;
 
@@ -271,20 +321,20 @@
             const cost = parseInt(document.getElementById('inputCost').value) || 50;
             state.data.rewards.push({ id: Date.now(), title: content, cost, count: 1 });
         }
-        saveData();
+        await saveData(); // 改为异步云端保存
         render();
         closeModal();
     }
 
-    function delItem(list, idx) {
+    async function delItem(list, idx) {
         if(confirm('确定删除吗？')) {
             state.data[list].splice(idx, 1);
-            saveData();
+            await saveData();
             render();
         }
     }
 
-    function toggleTask(idx) {
+    async function toggleTask(idx) {
         if (state.role === 'child') {
             const task = state.data.tasks[idx];
             if (!task.isCompleted) {
@@ -295,18 +345,18 @@
                 task.isCompleted = false;
                 state.data.points -= task.points;
             }
-            saveData();
+            await saveData();
             render();
         }
     }
 
-    function redeem(idx) {
+    async function redeem(idx) {
         if (state.role === 'child') {
             const reward = state.data.rewards[idx];
             if (state.data.points >= reward.cost) {
                 if(confirm(`确认消耗 ${reward.cost} 积分兑换【${reward.title}】吗？`)) {
                     state.data.points -= reward.cost;
-                    saveData();
+                    await saveData();
                     render();
                     alert('🎁 兑换成功！记得跟爸妈说一声领取奖品哦～');
                 }
