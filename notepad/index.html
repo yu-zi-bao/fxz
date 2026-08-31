@@ -38,23 +38,25 @@
     </div>
 
     <script>
-        // JSONBin.io 云端配置
-        const BIN_ID = '6a95418bda38895dfe256735';
-        const MASTER_KEY = '$2a$10$37Tyl/qtLzIkc1MXWqSq1efafrPme5N2wefD99TMmCs46IjyF7tVW';
-        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const HEADERS = {
-            '$masterKey': MASTER_KEY,
-            'Content-Type': 'application/json'
-        };
+        // Gitee 云端配置
+        const GITEE_USER = 'yusunhui'; // 余孙辉
+        const GITEE_REPO = 'h5-data';
+        const GITEE_TOKEN = '18856f72ca16a956d0adfec9e3b2245e';
+        const GITEE_FILE_NOTEPAD = 'data/notepad.json';
+        const GITEE_API = 'https://gitee.com/api/v5/repos';
 
         let notes = [];
 
         // 读取云端数据
         async function loadFromCloud() {
             try {
-                const res = await fetch(`${API_URL}/latest`, { headers: HEADERS });
+                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}`;
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `token ${GITEE_TOKEN}` }
+                });
+                if (!res.ok) return [];
                 const data = await res.json();
-                return data.record.notes || [];
+                return JSON.parse(atob(data.content)).notes || [];
             } catch(e) {
                 console.error('加载失败', e);
                 return [];
@@ -64,10 +66,18 @@
         // 写入云端数据
         async function saveToCloud(data) {
             try {
-                await fetch(API_URL, {
+                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}`;
+                await fetch(url, {
                     method: 'PUT',
-                    headers: HEADERS,
-                    body: JSON.stringify({ notes: data })
+                    headers: {
+                        'Authorization': `token ${GITEE_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: btoa(JSON.stringify({ notes: data })),
+                        message: '更新记事本',
+                        branch: 'master'
+                    })
                 });
             } catch(e) {
                 console.error('保存失败', e);
