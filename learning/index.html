@@ -3,371 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学习管理平台</title>
+    <title>学习管理平台 - 云端版</title>
     <style>
-        :root { --primary: #9c27b0; --accent: #ff4081; --bg: #f3f4f6; --glass: rgba(255,255,255,0.9); }
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: #333; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        /* 顶部区域 */
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; font-size: 20px; }
-        .stats { display: flex; justify-content: space-between; margin-top: 15px; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 12px; backdrop-filter: blur(5px); }
-        .stat-item { text-align: center; }
-        .stat-num { font-size: 24px; font-weight: bold; }
-        .stat-label { font-size: 12px; opacity: 0.9; }
-
-        /* 身份切换 */
-        .role-switch { display: flex; justify-content: center; margin: -20px auto 20px; position: relative; z-index: 10; }
-        .role-btn { padding: 10px 25px; background: white; color: #666; border-radius: 20px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.3s; }
-        .role-btn.active { background: var(--primary); color: white; transform: translateY(-5px); }
-
-        /* 内容容器 */
-        .container { padding: 0 15px 80px; max-width: 600px; margin: 0 auto; width: 100%; }
-        .section { background: var(--glass); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary); padding-left: 10px; }
-        
-        /* 列表与交互 */
-        .list-item { background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
-        .checkbox { width: 20px; height: 20px; border: 2px solid var(--primary); border-radius: 50%; display: inline-block; margin-right: 10px; cursor: pointer; position: relative; }
-        .checkbox.checked { background: var(--primary); }
-        .checkbox.checked::after { content: '✔'; position: absolute; top: -2px; left: 3px; color: white; font-size: 14px; }
-        .item-content { flex: 1; }
-        .item-title { font-weight: 600; font-size: 14px; }
-        .item-meta { font-size: 11px; color: #999; margin-top: 4px; }
-        .points-badge { background: #ffeb3b; color: #333; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
-        
-        /* 底部导航 */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-item { text-align: center; font-size: 12px; color: #999; cursor: pointer; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
-
-        /* 弹窗 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; }
-        .modal h3 { margin-top: 0; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-group { display: flex; justify-content: flex-end; gap: 10px; }
-        .btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-cancel { background: #eee; color: #666; }
-        .btn-reward { background: var(--accent); color: white; width: 100%; }
-        .btn-del { background: #ff5252; color: white; font-size: 12px; padding: 4px 8px; margin-left: 10px; }
-        
-        /* 加载动画 */
-        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 20px; color: var(--primary); }
+        body { margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+        .container { width: 95%; max-width: 600px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); margin-bottom: 20px; }
+        h1 { text-align: center; margin-bottom: 20px; font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .section-title { border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin: 20px 0 15px 0; font-size: 18px; font-weight: bold; }
+        .card { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input, select { flex: 1; padding: 10px; border-radius: 8px; border: none; outline: none; background: rgba(255,255,255,0.9); }
+        button { padding: 10px 15px; border-radius: 8px; border: none; background: #ff7e5f; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        button:active { transform: scale(0.95); }
+        .task-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .task-desc { flex: 1; }
+        .points { color: #ffd700; font-weight: bold; margin-right: 10px; }
+        .delete-btn { background: #ff4757; margin-left: 5px; }
+        .back-btn { display: block; text-align: center; margin-top: 20px; text-decoration: none; color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; }
+        .loading { text-align: center; padding: 20px; opacity: 0.8; }
+        .user-points { text-align: center; font-size: 20px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
-
-    <div class="loading" id="loading">正在同步云端数据...</div>
-
-    <div class="header">
-        <h1>🎓 学习管理平台</h1>
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-num" id="todayDate">--</div>
-                <div class="stat-label">今日日期</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num" id="totalPoints">0</div>
-                <div class="stat-label">我的积分</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="role-switch">
-        <div class="role-btn active" id="btnChild" onclick="switchRole('child')">👶 小朋友</div>
-        <div class="role-btn" id="btnParent" onclick="switchRole('parent')">👨‍👩‍👧 家长端</div>
-    </div>
-
-    <div class="container" id="appContent">
-        <!-- 动态内容加载 -->
-    </div>
-
-    <!-- 底部导航 -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('homework')">
-            <span class="nav-icon">📖</span>作业
-        </div>
-        <div class="nav-item" onclick="switchTab('checkin')">
-            <span class="nav-icon">✅</span>打卡
-        </div>
-        <div class="nav-item" onclick="switchTab('rewards')">
-            <span class="nav-icon">🎁</span>兑换
-        </div>
-        <div class="nav-item" onclick="goBack()">
-            <span class="nav-icon">🏠</span>首页
-        </div>
-    </div>
-
-    <!-- 弹窗：发布任务/作业 -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <h3 id="modalTitle">发布内容</h3>
-            <textarea id="inputContent" placeholder="请输入内容..." rows="3"></textarea>
-            <input type="number" id="inputPoints" placeholder="奖励积分 (如: 50)" style="display:none;">
-            <input type="number" id="inputCost" placeholder="消耗积分 (如: 100)" style="display:none;">
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-                <button class="btn btn-primary" onclick="saveItem()">发布</button>
-            </div>
-        </div>
-    </div>
-
-<script>
-    // ==========================================
-    // 【核心配置】在这里填入你的 JSONBin 信息
-    // ==========================================
-    const CLOUD_CONFIG = {
-        // 填入你在第一步获取的 Bin URL (类似 https://api.jsonbin.io/v3/b/xxxxxx)
-        BIN_URL: '请在此处填入BIN_URL', 
-        // 填入你在第一步获取的 Master Key (类似 $2a$10$xxxxxx)
-        API_KEY: '请在此处填入API_KEY'
-    };
-
-    let state = {
-        role: 'child', 
-        tab: 'homework', 
-        data: { homeworks: [], tasks: [], rewards: [], points: 0 }
-    };
-
-    // --- 云端同步核心函数 ---
-    async function getCloudData() {
-        try {
-            const res = await fetch(CLOUD_CONFIG.BIN_URL, {
-                headers: { 'X-Master-Key': CLOUD_CONFIG.API_KEY }
-            });
-            const json = await res.json();
-            return json.record; // 返回整个云端数据库
-        } catch (e) {
-            alert('云端读取失败，请检查 Key 是否正确');
-            console.error(e);
-            return null;
-        }
-    }
-
-    async function saveCloudData(fullData) {
-        try {
-            await fetch(CLOUD_CONFIG.BIN_URL, {
-                method: 'PUT',
-                headers: {
-                    'X-Master-Key': CLOUD_CONFIG.API_KEY,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(fullData)
-            });
-        } catch (e) {
-            alert('云端保存失败，请检查网络');
-            console.error(e);
-        }
-    }
-
-    // --- 初始化 ---
-    async function init() {
-        // 1. 尝试从云端读取
-        const fullData = await getCloudData();
+    <div class="container">
+        <h1>🎓 学习管理打卡平台</h1>
+        <div id="loading" class="loading">⏳ 正在连接云端数据...</div>
         
-        if (fullData && fullData.learning) {
-            state.data = fullData.learning;
-        } else {
-            // 如果云端是空的，写入默认数据
-            state.data.tasks = [
-                { id: Date.now(), title: '早睡早起 (22:00前睡觉)', points: 20, isCompleted: false },
-                { id: Date.now()+1, title: '主动收拾玩具', points: 10, isCompleted: false }
-            ];
-            state.data.rewards = [
-                { id: Date.now()+2, title: '看手机 20 分钟', cost: 50, count: 1 },
-                { id: Date.now()+3, title: '奖励 5 元零花钱', cost: 100, count: 1 },
-                { id: Date.now()+4, title: '吃一个汉堡', cost: 80, count: 1 },
-                { id: Date.now()+5, title: '吃牛排大餐', cost: 200, count: 1 }
-            ];
-            // 初始写入云端
-            saveCloudData({ learning: state.data, notepad: [] });
-        }
-        
-        document.getElementById('loading').style.display = 'none';
-        updateDate();
-        render();
-    }
+        <div id="content" style="display: none;">
+            <div class="user-points">当前积分：<span id="currentPoints">0</span> 💰</div>
 
-    function updateDate() {
-        const now = new Date();
-        document.getElementById('todayDate').innerText = `${now.getMonth()+1}月${now.getDate()}日`;
-        document.getElementById('totalPoints').innerText = state.data.points;
-    }
+            <div class="section-title">📝 每日作业 (家长发布)</div>
+            <div class="input-group">
+                <input type="text" id="jobTitle" placeholder="输入作业内容...">
+                <button onclick="addJob()">发布到云端</button>
+            </div>
+            <div id="jobList"></div>
 
-    // 云端保存逻辑
-    async function saveData() {
-        const fullData = await getCloudData();
-        if (fullData) {
-            fullData.learning = state.data; // 更新学习模块数据
-            await saveCloudData(fullData);  // 写回云端
-        }
-        updateDate();
-    }
+            <div class="section-title">🎯 打卡任务配置</div>
+            <div class="input-group">
+                <input type="text" id="taskName" placeholder="任务名称">
+                <input type="number" id="taskPoints" placeholder="积分" style="width: 70px; flex: none;"> 分
+                <button onclick="addTaskConfig()">添加</button>
+            </div>
+            <div id="taskConfigList"></div>
 
-    // ... (以下保持原有的渲染和交互逻辑不变) ...
-    function render() {
-        const container = document.getElementById('appContent');
-        container.innerHTML = '';
+            <div class="section-title">✅ 今日打卡 (小朋友勾选)</div>
+            <div id="taskList"></div>
 
-        if (state.tab === 'homework') {
-            let html = `<div class="section"><div class="section-title">今日作业 <span id="addBtn" style="display:none; color:var(--primary); cursor:pointer;" onclick="openModal('homework')">+ 发布</span></div><div id="hwList"></div></div>`;
-            container.innerHTML = html;
-            
-            const list = document.getElementById('hwList');
-            const btn = document.getElementById('addBtn');
-            
-            if (state.data.homeworks.length === 0) list.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">暂无作业，快去发布吧！</div>';
-            
-            state.data.homeworks.forEach((item, idx) => {
-                list.innerHTML += `<div class="list-item"><div class="item-content"><div class="item-title">${item.content}</div><div class="item-meta">${item.date}</div></div>${state.role === 'parent' ? `<button class="btn btn-del" onclick="delItem('homeworks', ${idx})">删除</button>` : ''}</div>`;
-            });
+            <div class="section-title">🎁 积分兑换</div>
+            <div class="input-group">
+                <input type="text" id="rewardName" placeholder="奖品名称">
+                <input type="number" id="rewardCost" placeholder="消耗积分" style="width: 80px; flex: none;">
+                <button onclick="addReward()">添加</button>
+            </div>
+            <div id="rewardList"></div>
+        </div>
 
-            if (state.role === 'parent') btn.style.display = 'block';
+        <a href="https://yu-zi-bao.github.io/fxz/" class="back-btn">🏠 返回首页</a>
+    </div>
 
-        } else if (state.tab === 'checkin') {
-            let html = `<div class="section"><div class="section-title">每日打卡任务 <span id="addBtn" style="display:none; color:var(--primary); cursor:pointer;" onclick="openModal('task')">+ 添加</span></div><div id="taskList"></div></div>`;
-            container.innerHTML = html;
-            const btn = document.getElementById('addBtn');
-            const list = document.getElementById('taskList');
+    <script>
+        // 云端配置
+        const CONFIG = {
+            TOKEN: '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',
+            REPO: 'yu-zi-bao/fxz',
+            BRANCH: 'main', 
+            FILE: 'data/learning.json'
+        };
 
-            if (state.role === 'parent') btn.style.display = 'block';
+        let appData = { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
 
-            state.data.tasks.forEach((item, idx) => {
-                list.innerHTML += `
-                    <div class="list-item" style="opacity: ${item.isCompleted ? 0.6 : 1}">
-                        <div class="checkbox ${item.isCompleted ? 'checked' : ''}" onclick="toggleTask(${idx})"></div>
-                        <div class="item-content" style="${item.isCompleted ? 'text-decoration:line-through' : ''}">
-                            <div class="item-title">${item.title}</div>
-                            <div class="item-meta">完成 +${item.points} 积分</div>
-                        </div>
-                        ${state.role === 'parent' ? `<button class="btn btn-del" onclick="delItem('tasks', ${idx})">删除</button>` : ''}
-                    </div>`;
-            });
+        async function syncCloudData(action, data) {
+            const url = `https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}?ref=${CONFIG.BRANCH}`;
+            const headers = { 'Authorization': `token ${CONFIG.TOKEN}`, 'Accept': 'application/vnd.github.v3+json' };
 
-        } else if (state.tab === 'rewards') {
-            let html = `<div class="section"><div class="section-title">积分兑换商店 <span id="addBtn" style="display:none; color:var(--primary); cursor:pointer;" onclick="openModal('reward')">+ 添加奖品</span></div><div id="rewardList"></div></div>`;
-            container.innerHTML = html;
-            const btn = document.getElementById('addBtn');
-            const list = document.getElementById('rewardList');
-
-            if (state.role === 'parent') btn.style.display = 'block';
-
-            state.data.rewards.forEach((item, idx) => {
-                list.innerHTML += `
-                    <div class="list-item">
-                        <div class="item-content">
-                            <div class="item-title">${item.title}</div>
-                            <div class="item-meta">需要 <span class="points-badge">${item.cost}</span> 积分</div>
-                        </div>
-                        <button class="btn btn-reward" style="width:auto; margin-left:10px;" onclick="redeem(${idx})">兑换</button>
-                    </div>`;
-            });
-        }
-    }
-
-    function switchRole(role) {
-        state.role = role;
-        document.getElementById('btnChild').className = role === 'child' ? 'role-btn active' : 'role-btn';
-        document.getElementById('btnParent').className = role === 'parent' ? 'role-btn active' : 'role-btn';
-        render();
-    }
-
-    function switchTab(tab) {
-        state.tab = tab;
-        const navs = document.querySelectorAll('.nav-item');
-        navs.forEach(n => n.classList.remove('active'));
-        navs.forEach(n => { if(n.innerHTML.includes(tab === 'homework' ? '作业' : tab === 'checkin' ? '打卡' : '兑换')) n.classList.add('active'); });
-        render();
-    }
-
-    function goBack() {
-        window.location.href = 'https://yu-zi-bao.github.io/fxz/index.html';
-    }
-
-    function openModal(type) {
-        document.getElementById('addModal').style.display = 'flex';
-        const t = document.getElementById('modalTitle');
-        const p = document.getElementById('inputPoints');
-        const c = document.getElementById('inputCost');
-        const inp = document.getElementById('inputContent');
-        
-        inp.value = '';
-        p.style.display = 'none';
-        c.style.display = 'none';
-
-        if (type === 'homework') { t.innerText = '发布新作业'; inp.placeholder = '请输入老师布置的作业内容'; }
-        else if (type === 'task') { t.innerText = '添加打卡任务'; inp.placeholder = '例如：阅读 20 分钟'; p.style.display = 'block'; }
-        else if (type === 'reward') { t.innerText = '添加新奖品'; inp.placeholder = '例如：吃一顿肯德基'; c.style.display = 'block'; }
-    }
-
-    function closeModal() {
-        document.getElementById('addModal').style.display = 'none';
-    }
-
-    async function saveItem() {
-        const content = document.getElementById('inputContent').value;
-        if (!content) return;
-
-        if (state.tab === 'homework') {
-            const now = new Date();
-            state.data.homeworks.push({ content, date: `${now.getMonth()+1}月${now.getDate()}日` });
-        } else if (state.tab === 'checkin') {
-            const points = parseInt(document.getElementById('inputPoints').value) || 10;
-            state.data.tasks.push({ id: Date.now(), title: content, points, isCompleted: false });
-        } else if (state.tab === 'rewards') {
-            const cost = parseInt(document.getElementById('inputCost').value) || 50;
-            state.data.rewards.push({ id: Date.now(), title: content, cost, count: 1 });
-        }
-        await saveData(); // 改为异步云端保存
-        render();
-        closeModal();
-    }
-
-    async function delItem(list, idx) {
-        if(confirm('确定删除吗？')) {
-            state.data[list].splice(idx, 1);
-            await saveData();
-            render();
-        }
-    }
-
-    async function toggleTask(idx) {
-        if (state.role === 'child') {
-            const task = state.data.tasks[idx];
-            if (!task.isCompleted) {
-                task.isCompleted = true;
-                state.data.points += task.points;
-                alert(`🎉 打卡成功！获得 ${task.points} 积分`);
+            if (action === 'read') {
+                try {
+                    const res = await fetch(url, { headers });
+                    if (!res.ok) return null;
+                    const json = await res.json();
+                    return JSON.parse(atob(json.content.split('\n')[0]));
+                } catch(e) { return null; }
             } else {
-                task.isCompleted = false;
-                state.data.points -= task.points;
+                try {
+                    const getRes = await fetch(url, { headers });
+                    const meta = await getRes.json();
+                    const putUrl = `https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}`;
+                    await fetch(putUrl, {
+                        method: 'PUT',
+                        headers: { ...headers, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: 'Update from Learning Platform',
+                            branch: CONFIG.BRANCH,
+                            sha: meta.sha,
+                            content: btoa(JSON.stringify(data, null, 2))
+                        })
+                    });
+                } catch(e) { console.error(e); }
             }
-            await saveData();
+        }
+
+        async function init() {
+            appData = await syncCloudData('read') || { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
+            render();
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        function render() {
+            const points = appData.tasks.reduce((sum, t) => sum + (t.done ? (t.points || 0) : 0), 0);
+            document.getElementById('currentPoints').textContent = points;
+
+            document.getElementById('jobList').innerHTML = appData.tasks.filter(t => t.type === 'job').map(t => `
+                <div class="task-item card">
+                    <div class="task-desc">📝 ${t.name}</div>
+                    <button class="delete-btn" onclick="deleteItem('${t.id}')">删除</button>
+                </div>
+            `).join('') || '<div style="opacity:0.6; text-align:center">暂无作业</div>';
+
+            document.getElementById('taskConfigList').innerHTML = appData.tasksConfig.map(t => `
+                <div class="task-item card">
+                    <div class="task-desc">🎯 ${t.name} (+${t.points}分)</div>
+                    <button class="delete-btn" onclick="deleteConfig('${t.id}')">删除</button>
+                </div>
+            `).join('');
+
+            const today = new Date().toDateString();
+            const todayTasks = appData.tasks.filter(t => t.type === 'task');
+            document.getElementById('taskList').innerHTML = appData.tasksConfig.map(cfg => {
+                const existing = todayTasks.find(t => t.name === cfg.name && t.date === today);
+                const isDone = existing && existing.done;
+                return `
+                    <div class="task-item card">
+                        <div class="task-desc">${isDone ? '✅' : '⬜'} ${cfg.name}</div>
+                        <button onclick="checkTask('${cfg.name}', ${cfg.points})">${isDone ? '已打卡' : '打卡'}</button>
+                    </div>
+                `;
+            }).join('') || '<div style="opacity:0.6; text-align:center">请先配置任务</div>';
+
+            document.getElementById('rewardList').innerHTML = appData.pointsConfig.map(r => `
+                <div class="task-item card">
+                    <div class="task-desc">🎁 ${r.name} <span class="points">(${r.cost}分)</span></div>
+                    <button onclick="redeemReward('${r.name}', ${r.cost})">兑换</button>
+                    <button class="delete-btn" onclick="deleteReward('${r.id}')">删除</button>
+                </div>
+            `).join('');
+        }
+
+        async function addJob() {
+            const title = document.getElementById('jobTitle').value;
+            if (!title) return;
+            appData.tasks.push({ id: Date.now().toString(), type: 'job', name: title });
+            await syncCloudData('write', appData);
+            document.getElementById('jobTitle').value = '';
             render();
         }
-    }
 
-    async function redeem(idx) {
-        if (state.role === 'child') {
-            const reward = state.data.rewards[idx];
-            if (state.data.points >= reward.cost) {
-                if(confirm(`确认消耗 ${reward.cost} 积分兑换【${reward.title}】吗？`)) {
-                    state.data.points -= reward.cost;
-                    await saveData();
-                    render();
-                    alert('🎁 兑换成功！记得跟爸妈说一声领取奖品哦～');
+        async function addTaskConfig() {
+            const name = document.getElementById('taskName').value;
+            const points = parseInt(document.getElementById('taskPoints').value) || 10;
+            if (!name) return;
+            appData.tasksConfig.push({ id: Date.now().toString(), name, points });
+            await syncCloudData('write', appData);
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskPoints').value = '';
+            render();
+        }
+
+        async function checkTask(name, points) {
+            const today = new Date().toDateString();
+            const existing = appData.tasks.find(t => t.name === name && t.date === today && t.type === 'task');
+            if (existing) {
+                existing.done = !existing.done;
+            } else {
+                appData.tasks.push({ id: Date.now().toString(), type: 'task', name, points, date: today, done: true });
+            }
+            await syncCloudData('write', appData);
+            render();
+        }
+
+        async function addReward() {
+            const name = document.getElementById('rewardName').value;
+            const cost = parseInt(document.getElementById('rewardCost').value);
+            if (!name || !cost) return;
+            appData.pointsConfig.push({ id: Date.now().toString(), name, cost });
+            await syncCloudData('write', appData);
+            document.getElementById('rewardName').value = '';
+            document.getElementById('rewardCost').value = '';
+            render();
+        }
+
+        async function redeemReward(name, cost) {
+            const current = appData.tasks.reduce((sum, t) => sum + (t.done ? (t.points || 0) : 0), 0);
+            if (current < cost) { alert('积分不足！'); return; }
+            if (!confirm(`确认兑换 ${name} 吗？将扣除 ${cost} 分`)) return;
+            appData.pointsLog.push({ date: new Date().toLocaleString(), reward: name, cost: cost });
+            let toDeduct = cost;
+            for (let i = appData.tasks.length - 1; i >= 0; i--) {
+                if (appData.tasks[i].done && appData.tasks[i].type === 'task') {
+                    appData.tasks[i].done = false;
+                    toDeduct -= appData.tasks[i].points;
+                    if (toDeduct <= 0) break;
                 }
-            } else {
-                alert('❌ 积分不足，继续加油！');
             }
+            await syncCloudData('write', appData);
+            render();
         }
-    }
 
-    // 启动
-    init();
-</script>
+        async function deleteItem(id) { appData.tasks = appData.tasks.filter(t => t.id !== id); await syncCloudData('write', appData); render(); }
+        async function deleteConfig(id) { appData.tasksConfig = appData.tasksConfig.filter(t => t.id !== id); await syncCloudData('write', appData); render(); }
+        async function deleteReward(id) { appData.pointsConfig = appData.pointsConfig.filter(t => t.id !== id); await syncCloudData('write', appData); render(); }
+
+        init();
+    </script>
 </body>
 </html>
