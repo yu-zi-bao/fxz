@@ -62,113 +62,118 @@
     </div>
 
     <script>
-        // 云端配置
-        const CONFIG = {
-            TOKEN: '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',
-            REPO: 'yu-zi-bao/fxz',
-            BRANCH: 'main', 
-            FILE: 'data/learning.json'
+        // JSONBin.io 云端配置
+        const BIN_ID = '6a9549aef5f4af5e2957104e';
+        const MASTER_KEY = '$2a$10$3Y8Qx4mwT5aKis/b.SFn4O6pWW43WXfbD5XyzYVQ.aMYLohLkbvpy';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        const HEADERS = {
+            '$masterKey': MASTER_KEY,
+            'Content-Type': 'application/json'
         };
 
         let appData = { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
 
-        async function syncCloudData(action, data) {
-            const url = `https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}?ref=${CONFIG.BRANCH}`;
-            const headers = { 'Authorization': `token ${CONFIG.TOKEN}`, 'Accept': 'application/vnd.github.v3+json' };
-
-            if (action === 'read') {
-                try {
-                    const res = await fetch(url, { headers });
-                    if (!res.ok) return null;
-                    const json = await res.json();
-                    return JSON.parse(atob(json.content.split('\n')[0]));
-                } catch(e) { return null; }
-            } else {
-                try {
-                    const getRes = await fetch(url, { headers });
-                    const meta = await getRes.json();
-                    const putUrl = `https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.FILE}`;
-                    await fetch(putUrl, {
-                        method: 'PUT',
-                        headers: { ...headers, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            message: 'Update from Learning Platform',
-                            branch: CONFIG.BRANCH,
-                            sha: meta.sha,
-                            content: btoa(JSON.stringify(data, null, 2))
-                        })
-                    });
-                } catch(e) { console.error(e); }
+        // 读取云端数据
+        async function loadFromCloud() {
+            try {
+                const res = await fetch(`${API_URL}/latest`, { headers: HEADERS });
+                const data = await res.json();
+                return data.record || { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
+            } catch(e) {
+                console.error('加载失败', e);
+                return { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
             }
         }
 
+        // 写入云端数据
+        async function saveToCloud(data) {
+            try {
+                await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: HEADERS,
+                    body: JSON.stringify(data)
+                });
+            } catch(e) {
+                console.error('保存失败', e);
+                alert('保存失败，请稍后重试');
+            }
+        }
+
+        // 初始化
         async function init() {
-            appData = await syncCloudData('read') || { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
+            appData = await loadFromCloud();
             render();
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
         }
 
+        // 渲染所有列表
         function render() {
             const points = appData.tasks.reduce((sum, t) => sum + (t.done ? (t.points || 0) : 0), 0);
             document.getElementById('currentPoints').textContent = points;
 
+            // 作业列表
             document.getElementById('jobList').innerHTML = appData.tasks.filter(t => t.type === 'job').map(t => `
                 <div class="task-item card">
-                    <div class="task-desc">📝 ${t.name}</div>
+                    <div class="task-desc">📝 ${escapeHtml(t.name)}</div>
                     <button class="delete-btn" onclick="deleteItem('${t.id}')">删除</button>
                 </div>
             `).join('') || '<div style="opacity:0.6; text-align:center">暂无作业</div>';
 
+            // 任务配置列表
             document.getElementById('taskConfigList').innerHTML = appData.tasksConfig.map(t => `
                 <div class="task-item card">
-                    <div class="task-desc">🎯 ${t.name} (+${t.points}分)</div>
+                    <div class="task-desc">🎯 ${escapeHtml(t.name)} (+${t.points}分)</div>
                     <button class="delete-btn" onclick="deleteConfig('${t.id}')">删除</button>
                 </div>
             `).join('');
 
+            // 今日打卡
             const today = new Date().toDateString();
-            const todayTasks = appData.tasks.filter(t => t.type === 'task');
             document.getElementById('taskList').innerHTML = appData.tasksConfig.map(cfg => {
-                const existing = todayTasks.find(t => t.name === cfg.name && t.date === today);
+                const existing = appData.tasks.find(t => t.name === cfg.name && t.date === today && t.type === 'task');
                 const isDone = existing && existing.done;
                 return `
                     <div class="task-item card">
-                        <div class="task-desc">${isDone ? '✅' : '⬜'} ${cfg.name}</div>
+                        <div class="task-desc">${isDone ? '✅' : '⬜'} ${escapeHtml(cfg.name)}</div>
                         <button onclick="checkTask('${cfg.name}', ${cfg.points})">${isDone ? '已打卡' : '打卡'}</button>
                     </div>
                 `;
             }).join('') || '<div style="opacity:0.6; text-align:center">请先配置任务</div>';
 
+            // 奖品列表
             document.getElementById('rewardList').innerHTML = appData.pointsConfig.map(r => `
                 <div class="task-item card">
-                    <div class="task-desc">🎁 ${r.name} <span class="points">(${r.cost}分)</span></div>
+                    <div class="task-desc">🎁 ${escapeHtml(r.name)} <span class="points">(${r.cost}分)</span></div>
                     <button onclick="redeemReward('${r.name}', ${r.cost})">兑换</button>
                     <button class="delete-btn" onclick="deleteReward('${r.id}')">删除</button>
                 </div>
             `).join('');
         }
 
+        // 添加作业
         async function addJob() {
-            const title = document.getElementById('jobTitle').value;
-            if (!title) return;
+            const title = document.getElementById('jobTitle').value.trim();
+            if (!title) { alert('请输入作业内容'); return; }
             appData.tasks.push({ id: Date.now().toString(), type: 'job', name: title });
-            await syncCloudData('write', appData);
+            await saveToCloud(appData);
             document.getElementById('jobTitle').value = '';
             render();
         }
 
+        // 添加任务配置
         async function addTaskConfig() {
-            const name = document.getElementById('taskName').value;
+            const name = document.getElementById('taskName').value.trim();
             const points = parseInt(document.getElementById('taskPoints').value) || 10;
-            if (!name) return;
+            if (!name) { alert('请输入任务名称'); return; }
             appData.tasksConfig.push({ id: Date.now().toString(), name, points });
-            await syncCloudData('write', appData);
+            await saveToCloud(appData);
             document.getElementById('taskName').value = '';
             document.getElementById('taskPoints').value = '';
             render();
         }
 
+        // 打卡
         async function checkTask(name, points) {
             const today = new Date().toDateString();
             const existing = appData.tasks.find(t => t.name === name && t.date === today && t.type === 'task');
@@ -177,26 +182,31 @@
             } else {
                 appData.tasks.push({ id: Date.now().toString(), type: 'task', name, points, date: today, done: true });
             }
-            await syncCloudData('write', appData);
+            await saveToCloud(appData);
             render();
         }
 
+        // 添加奖品
         async function addReward() {
-            const name = document.getElementById('rewardName').value;
+            const name = document.getElementById('rewardName').value.trim();
             const cost = parseInt(document.getElementById('rewardCost').value);
-            if (!name || !cost) return;
+            if (!name || !cost) { alert('请填写完整'); return; }
             appData.pointsConfig.push({ id: Date.now().toString(), name, cost });
-            await syncCloudData('write', appData);
+            await saveToCloud(appData);
             document.getElementById('rewardName').value = '';
             document.getElementById('rewardCost').value = '';
             render();
         }
 
+        // 兑换奖品
         async function redeemReward(name, cost) {
             const current = appData.tasks.reduce((sum, t) => sum + (t.done ? (t.points || 0) : 0), 0);
             if (current < cost) { alert('积分不足！'); return; }
             if (!confirm(`确认兑换 ${name} 吗？将扣除 ${cost} 分`)) return;
+            
             appData.pointsLog.push({ date: new Date().toLocaleString(), reward: name, cost: cost });
+            
+            // 扣减积分（撤销打卡）
             let toDeduct = cost;
             for (let i = appData.tasks.length - 1; i >= 0; i--) {
                 if (appData.tasks[i].done && appData.tasks[i].type === 'task') {
@@ -205,13 +215,21 @@
                     if (toDeduct <= 0) break;
                 }
             }
-            await syncCloudData('write', appData);
+            await saveToCloud(appData);
             render();
         }
 
-        async function deleteItem(id) { appData.tasks = appData.tasks.filter(t => t.id !== id); await syncCloudData('write', appData); render(); }
-        async function deleteConfig(id) { appData.tasksConfig = appData.tasksConfig.filter(t => t.id !== id); await syncCloudData('write', appData); render(); }
-        async function deleteReward(id) { appData.pointsConfig = appData.pointsConfig.filter(t => t.id !== id); await syncCloudData('write', appData); render(); }
+        // 删除函数
+        async function deleteItem(id) { appData.tasks = appData.tasks.filter(t => t.id !== id); await saveToCloud(appData); render(); }
+        async function deleteConfig(id) { appData.tasksConfig = appData.tasksConfig.filter(t => t.id !== id); await saveToCloud(appData); render(); }
+        async function deleteReward(id) { appData.pointsConfig = appData.pointsConfig.filter(t => t.id !== id); await saveToCloud(appData); render(); }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
 
         init();
     </script>
