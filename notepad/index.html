@@ -68,9 +68,12 @@
         .btn-save { width: 100%; padding: 14px; background: var(--primary); color: #333; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
         .btn-save:hover { background: var(--accent); }
         .btn-delete-confirm { width: 100%; padding: 14px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 20px; color: var(--accent); }
     </style>
 </head>
 <body>
+
+    <div class="loading" id="loading">正在同步云端数据...</div>
 
     <div class="header">
         <h1>📝 记事本</h1>
@@ -124,185 +127,232 @@
     </div>
 
 <script>
-const DB_KEY = 'xiaoyu_notebook_db';
-let notes = [];
-let editingId = null;
+    // ==========================================
+    // 【核心配置】填入和上面一样的 JSONBin 信息
+    // ==========================================
+    const CLOUD_CONFIG = {
+        BIN_URL: '请在此处填入BIN_URL', 
+        API_KEY: '请在此处填入API_KEY'
+    };
 
-function init() {
-    const saved = localStorage.getItem(DB_KEY);
-    if (saved) {
-        notes = JSON.parse(saved);
-    }
-    updateStats();
-    renderNotes();
-}
+    let notes = [];
+    let editingId = null;
 
-function updateStats() {
-    document.getElementById('noteCount').innerText = notes.length;
-    const today = new Date().toDateString();
-    const todayNotes = notes.filter(n => new Date(n.createdAt).toDateString() === today);
-    document.getElementById('todayCount').innerText = todayNotes.length;
-}
-
-function renderNotes(filteredNotes = null) {
-    const list = document.getElementById('noteList');
-    const displayNotes = filteredNotes || notes;
-    
-    if (displayNotes.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📝</div>
-                <div class="empty-text">${filteredNotes ? '没有找到匹配的笔记' : '还没有笔记，点击右上角 + 开始记录吧！'}</div>
-            </div>`;
-        return;
+    // --- 云端同步核心函数 (同上) ---
+    async function getCloudData() {
+        try {
+            const res = await fetch(CLOUD_CONFIG.BIN_URL, {
+                headers: { 'X-Master-Key': CLOUD_CONFIG.API_KEY }
+            });
+            const json = await res.json();
+            return json.record;
+        } catch (e) {
+            alert('云端读取失败');
+            return null;
+        }
     }
 
-    // 按创建时间倒序
-    const sorted = [...displayNotes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
-    list.innerHTML = sorted.map(note => `
-        <div class="note-card" onclick="openModal(${note.id})">
-            <div class="note-title">${escapeHtml(note.title)}</div>
-            <div class="note-content">${escapeHtml(note.content)}</div>
-            <div class="note-footer">
-                <span>${formatDate(note.createdAt)}</span>
-                <div class="note-actions">
-                    <button class="btn-action btn-edit" onclick="event.stopPropagation(); openModal(${note.id})">✏️</button>
-                    <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNoteDirect(${note.id})">🗑️</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now - date;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
-    if (days === 0) {
-        return '今天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
-    } else if (days === 1) {
-        return '昨天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
-    } else if (days < 7) {
-        return `${days}天前`;
-    } else {
-        return date.toLocaleDateString('zh-CN');
+    async function saveCloudData(fullData) {
+        try {
+            await fetch(CLOUD_CONFIG.BIN_URL, {
+                method: 'PUT',
+                headers: {
+                    'X-Master-Key': CLOUD_CONFIG.API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(fullData)
+            });
+        } catch (e) {
+            alert('云端保存失败');
+        }
     }
-}
 
-function openModal(id = null) {
-    editingId = id;
-    const modal = document.getElementById('noteModal');
-    const title = document.getElementById('modalTitle');
-    const titleInput = document.getElementById('noteTitle');
-    const contentInput = document.getElementById('noteContent');
-    const deleteBtn = document.getElementById('deleteBtn');
-    
-    if (id) {
-        const note = notes.find(n => n.id === id);
-        title.innerText = '编辑笔记';
-        titleInput.value = note.title;
-        contentInput.value = note.content;
-        deleteBtn.style.display = 'block';
-    } else {
-        title.innerText = '新增笔记';
-        titleInput.value = '';
-        contentInput.value = '';
-        deleteBtn.style.display = 'none';
-    }
-    
-    modal.classList.add('active');
-    titleInput.focus();
-}
-
-function closeModal() {
-    document.getElementById('noteModal').classList.remove('active');
-    editingId = null;
-}
-
-function saveNote() {
-    const title = document.getElementById('noteTitle').value.trim();
-    const content = document.getElementById('noteContent').value.trim();
-    
-    if (!title && !content) {
-        alert('标题和内容不能同时为空');
-        return;
-    }
-    
-    if (editingId) {
-        // 编辑模式
-        const note = notes.find(n => n.id === editingId);
-        note.title = title || '无标题';
-        note.content = content;
-        note.updatedAt = new Date().toISOString();
-    } else {
-        // 新增模式
-        notes.push({
-            id: Date.now(),
-            title: title || '无标题',
-            content: content,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        });
-    }
-    
-    localStorage.setItem(DB_KEY, JSON.stringify(notes));
-    updateStats();
-    renderNotes();
-    closeModal();
-}
-
-function deleteNoteDirect(id) {
-    if (confirm('确定要删除这条笔记吗？')) {
-        notes = notes.filter(n => n.id !== id);
-        localStorage.setItem(DB_KEY, JSON.stringify(notes));
+    // --- 初始化 ---
+    async function init() {
+        const fullData = await getCloudData();
+        if (fullData && fullData.notepad) {
+            notes = fullData.notepad;
+        }
+        document.getElementById('loading').style.display = 'none';
         updateStats();
         renderNotes();
     }
-}
 
-function deleteNote() {
-    if (editingId && confirm('确定要删除这条笔记吗？')) {
-        notes = notes.filter(n => n.id !== editingId);
-        localStorage.setItem(DB_KEY, JSON.stringify(notes));
+    function updateStats() {
+        document.getElementById('noteCount').innerText = notes.length;
+        const today = new Date().toDateString();
+        const todayNotes = notes.filter(n => new Date(n.createdAt).toDateString() === today);
+        document.getElementById('todayCount').innerText = todayNotes.length;
+    }
+
+    function renderNotes(filteredNotes = null) {
+        const list = document.getElementById('noteList');
+        const displayNotes = filteredNotes || notes;
+        
+        if (displayNotes.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <div class="empty-text">${filteredNotes ? '没有找到匹配的笔记' : '还没有笔记，点击右上角 + 开始记录吧！'}</div>
+                </div>`;
+            return;
+        }
+
+        const sorted = [...displayNotes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        list.innerHTML = sorted.map(note => `
+            <div class="note-card" onclick="openModal(${note.id})">
+                <div class="note-title">${escapeHtml(note.title)}</div>
+                <div class="note-content">${escapeHtml(note.content)}</div>
+                <div class="note-footer">
+                    <span>${formatDate(note.createdAt)}</span>
+                    <div class="note-actions">
+                        <button class="btn-action btn-edit" onclick="event.stopPropagation(); openModal(${note.id})">✏️</button>
+                        <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNoteDirect(${note.id})">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = now - date;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        
+        if (days === 0) {
+            return '今天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+        } else if (days === 1) {
+            return '昨天 ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+        } else if (days < 7) {
+            return `${days}天前`;
+        } else {
+            return date.toLocaleDateString('zh-CN');
+        }
+    }
+
+    function openModal(id = null) {
+        editingId = id;
+        const modal = document.getElementById('noteModal');
+        const title = document.getElementById('modalTitle');
+        const titleInput = document.getElementById('noteTitle');
+        const contentInput = document.getElementById('noteContent');
+        const deleteBtn = document.getElementById('deleteBtn');
+        
+        if (id) {
+            const note = notes.find(n => n.id === id);
+            title.innerText = '编辑笔记';
+            titleInput.value = note.title;
+            contentInput.value = note.content;
+            deleteBtn.style.display = 'block';
+        } else {
+            title.innerText = '新增笔记';
+            titleInput.value = '';
+            contentInput.value = '';
+            deleteBtn.style.display = 'none';
+        }
+        
+        modal.classList.add('active');
+        titleInput.focus();
+    }
+
+    function closeModal() {
+        document.getElementById('noteModal').classList.remove('active');
+        editingId = null;
+    }
+
+    async function saveNote() {
+        const title = document.getElementById('noteTitle').value.trim();
+        const content = document.getElementById('noteContent').value.trim();
+        
+        if (!title && !content) {
+            alert('标题和内容不能同时为空');
+            return;
+        }
+        
+        if (editingId) {
+            const note = notes.find(n => n.id === editingId);
+            note.title = title || '无标题';
+            note.content = content;
+            note.updatedAt = new Date().toISOString();
+        } else {
+            notes.push({
+                id: Date.now(),
+                title: title || '无标题',
+                content: content,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            });
+        }
+        
+        const fullData = await getCloudData();
+        if (fullData) {
+            fullData.notepad = notes;
+            await saveCloudData(fullData);
+        }
+        
         updateStats();
         renderNotes();
         closeModal();
     }
-}
 
-function searchNotes() {
-    const query = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!query) {
-        renderNotes();
-        return;
+    async function deleteNoteDirect(id) {
+        if (confirm('确定要删除这条笔记吗？')) {
+            notes = notes.filter(n => n.id !== id);
+            const fullData = await getCloudData();
+            if (fullData) {
+                fullData.notepad = notes;
+                await saveCloudData(fullData);
+            }
+            updateStats();
+            renderNotes();
+        }
     }
-    const filtered = notes.filter(n => 
-        n.title.toLowerCase().includes(query) || 
-        n.content.toLowerCase().includes(query)
-    );
-    renderNotes(filtered);
-}
 
-function goBack() {
-    window.location.href = 'https://yu-zi-bao.github.io/fxz/';
-}
+    async function deleteNote() {
+        if (editingId && confirm('确定要删除这条笔记吗？')) {
+            notes = notes.filter(n => n.id !== editingId);
+            const fullData = await getCloudData();
+            if (fullData) {
+                fullData.notepad = notes;
+                await saveCloudData(fullData);
+            }
+            updateStats();
+            renderNotes();
+            closeModal();
+        }
+    }
 
-// 点击弹窗外部关闭
-document.getElementById('noteModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
+    function searchNotes() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        if (!query) {
+            renderNotes();
+            return;
+        }
+        const filtered = notes.filter(n => 
+            n.title.toLowerCase().includes(query) || 
+            n.content.toLowerCase().includes(query)
+        );
+        renderNotes(filtered);
+    }
 
-// 初始化
-init();
+    function goBack() {
+        window.location.href = 'https://yu-zi-bao.github.io/fxz/index.html';
+    }
+
+    document.getElementById('noteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // 启动
+    init();
 </script>
 </body>
 </html>
