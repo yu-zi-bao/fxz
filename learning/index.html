@@ -70,23 +70,9 @@
         const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
         const GITEE_FILE_LEARNING = 'data/learning.json';
         const GITEE_API = 'https://gitee.com/api/v5/repos';
-        let BRANCH = 'master';
+        const BRANCH = 'master';
 
         let appData = { tasks: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
-
-        // 获取仓库默认分支
-        async function getBranch() {
-            try {
-                const res = await fetch(`${GITEE_API}/${GITEE_USER}/${GITEE_REPO}`, {
-                    headers: { 'Authorization': `token ${GITEE_TOKEN}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    return data.default_branch || 'master';
-                }
-            } catch(e) {}
-            return 'master';
-        }
 
         // 读取云端数据
         async function loadFromCloud() {
@@ -143,7 +129,6 @@
 
         // 初始化
         async function init() {
-            BRANCH = await getBranch();
             appData = await loadFromCloud();
             render();
             document.getElementById('loading').style.display = 'none';
