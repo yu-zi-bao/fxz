@@ -59,147 +59,202 @@
         </div>
     </div>
     <script>
-        const GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/notepad.json';
-        const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
-        let fileSHA = null;
-        let allNotes = [];
+    (function() {
+        'use strict';
 
-        // Base64 → UTF-8 文本（正确处理中文）
-        function base64Decode(b64) {
-            const binary = atob(b64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        // ===== 配置 =====
+        var GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/notepad.json';
+        var GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
+
+        // ===== 全局状态 =====
+        var state = {
+            fileSHA: null,
+            notes: [],
+            currentEditIndex: -1
+        };
+
+        // ===== Base64 ↔ UTF-8 编解码 =====
+        function base64ToText(b64) {
+            var binary = atob(b64);
+            var bytes = new Uint8Array(binary.length);
+            for (var i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
             return new TextDecoder('utf-8').decode(bytes);
         }
-        // UTF-8 文本 → Base64
+
         function textToBase64(text) {
-            const bytes = new TextEncoder().encode(text);
-            return btoa(String.fromCharCode(...bytes));
+            var bytes = new TextEncoder().encode(text);
+            return btoa(String.fromCharCode.apply(null, bytes));
         }
 
-        // 云端加载
-        async function loadFromCloud() {
-            try {
-                const res = await fetch(GITEE_API + '?ref=master', {
-                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN }
-                });
+        // ===== 从云端加载 =====
+        function loadFromCloud() {
+            console.log('[CloudNote] 开始从云端加载...');
+            return fetch(GITEE_API + '?ref=master', {
+                headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN }
+            }).then(function(res) {
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.json();
-                fileSHA = data.sha;
-                const decoded = base64Decode(data.content);
-                const parsed = JSON.parse(decoded);
-                // 兼容 {notes:[...]} 和直接 [...] 两种格式
-                allNotes = Array.isArray(parsed) ? parsed : (parsed.notes || []);
+                return res.json();
+            }).then(function(giteeData) {
+                console.log('[CloudNote] 获取到 Gitee 响应，SHA:', giteeData.sha);
+                state.fileSHA = giteeData.sha;
+
+                var decoded = base64ToText(giteeData.content);
+                console.log('[CloudNote] 解码后:', decoded.substring(0, 100));
+
+                var parsed = JSON.parse(decoded);
+                console.log('[CloudNote] 解析类型:', typeof parsed, 'isArray:', Array.isArray(parsed));
+
+                // 兼容两种格式
+                if (Array.isArray(parsed)) {
+                    state.notes = parsed;
+                } else if (parsed && Array.isArray(parsed.notes)) {
+                    state.notes = parsed.notes;
+                } else {
+                    console.warn('[CloudNote] 格式异常，使用空数组');
+                    state.notes = [];
+                }
+
+                console.log('[CloudNote] 加载成功，共', state.notes.length, '条笔记');
                 renderNotes();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
-            } catch(e) {
+            }).catch(function(e) {
+                console.error('[CloudNote] 加载失败:', e);
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = '⚠️ 加载失败：' + e.message;
-            }
+                document.getElementById('content').style.display = 'block';
+                var errEl = document.getElementById('error');
+                errEl.style.display = 'block';
+                errEl.textContent = '⚠️ 加载失败：' + e.message;
+            });
         }
 
-        // 云端保存（带 SHA）
-        async function saveToCloud() {
-            if (!fileSHA) {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = '⚠️ 未获取到文件 SHA';
+        // ===== 保存到云端 =====
+        function saveToCloud() {
+            console.log('[CloudNote] 开始保存，SHA:', state.fileSHA);
+            if (!state.fileSHA) {
+                showError('未获取到文件 SHA，请刷新页面');
                 return;
             }
-            try {
-                const jsonStr = JSON.stringify({ notes: allNotes }, null, 2);
-                const b64 = textToBase64(jsonStr);
-                const res = await fetch(GITEE_API, {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: b64, message: '更新记事本', branch: 'master', sha: fileSHA })
-                });
+
+            var payload = {
+                content: textToBase64(JSON.stringify({ notes: state.notes }, null, 2)),
+                message: '更新记事本 ' + new Date().toLocaleString(),
+                branch: 'master',
+                sha: state.fileSHA
+            };
+
+            return fetch(GITEE_API, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(function(res) {
                 if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error('保存失败 ' + res.status + ': ' + errText.substring(0, 100));
+                    return res.text().then(function(t) {
+                        throw new Error('保存失败 ' + res.status + ': ' + t.substring(0, 120));
+                    });
                 }
-                const result = await res.json();
-                fileSHA = result.content.sha;
+                return res.json();
+            }).then(function(result) {
+                state.fileSHA = result.content.sha;
+                console.log('[CloudNote] 保存成功，新 SHA:', state.fileSHA);
                 renderNotes();
-            } catch(e) {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = '⚠️ ' + e.message;
-            }
+            }).catch(function(e) {
+                console.error('[CloudNote] 保存失败:', e);
+                showError(e.message);
+            });
         }
 
-        // 渲染笔记列表
+        // ===== 渲染列表 =====
         function renderNotes() {
-            const container = document.getElementById('notes-list');
-            if (!Array.isArray(allNotes) || allNotes.length === 0) {
+            var container = document.getElementById('notes-list');
+            var notes = state.notes;
+
+            if (!Array.isArray(notes) || notes.length === 0) {
                 container.innerHTML = '<div class="empty">📭 还没有笔记哦，点击上方按钮创建第一条！</div>';
                 return;
             }
-            // 使用拷贝反转，不修改原数组
-            const sorted = [...allNotes].reverse();
-            container.innerHTML = sorted.map((note, i) => {
-                const origIndex = allNotes.length - 1 - i;
-                return `
-                <div class="note-card">
-                    <div class="note-title">${escapeHtml(note.title)}</div>
-                    <div class="note-text">${escapeHtml(note.text)}</div>
-                    <div class="note-time">🕐 ${note.time}</div>
-                    <div class="note-actions">
-                        <button onclick="editNote(${origIndex})">✏️ 编辑</button>
-                        <button class="del" onclick="deleteNote(${origIndex})">🗑️ 删除</button>
-                    </div>
-                </div>`;
+
+            var sorted = notes.slice().reverse();
+            var html = sorted.map(function(note, i) {
+                var idx = notes.length - 1 - i;
+                return '<div class="note-card">' +
+                    '<div class="note-title">' + esc(note.title) + '</div>' +
+                    '<div class="note-text">' + esc(note.text) + '</div>' +
+                    '<div class="note-time">🕐 ' + esc(note.time) + '</div>' +
+                    '<div class="note-actions">' +
+                        '<button onclick="window.editNote(' + idx + ')">✏️ 编辑</button>' +
+                        '<button class="del" onclick="window.deleteNote(' + idx + ')">🗑️ 删除</button>' +
+                    '</div></div>';
             }).join('');
+
+            container.innerHTML = html;
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function esc(t) {
+            if (!t) return '';
+            var d = document.createElement('div');
+            d.textContent = String(t);
+            return d.innerHTML;
         }
 
-        let currentEditIndex = -1;
-        function openModal() {
-            currentEditIndex = -1;
+        function showError(msg) {
+            var e = document.getElementById('error');
+            e.style.display = 'block';
+            e.textContent = '⚠️ ' + msg;
+        }
+
+        // ===== 暴露到全局 =====
+        window.openModal = function() {
+            state.currentEditIndex = -1;
             document.getElementById('modalTitle').textContent = '✨ 新增笔记';
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteContent').value = '';
             document.getElementById('noteModal').classList.add('show');
-        }
-        function editNote(index) {
-            currentEditIndex = index;
-            const note = allNotes[index];
+        };
+
+        window.editNote = function(idx) {
+            state.currentEditIndex = idx;
+            var n = state.notes[idx];
             document.getElementById('modalTitle').textContent = '✏️ 编辑笔记';
-            document.getElementById('noteTitle').value = note.title;
-            document.getElementById('noteContent').value = note.text;
+            document.getElementById('noteTitle').value = n.title || '';
+            document.getElementById('noteContent').value = n.text || '';
             document.getElementById('noteModal').classList.add('show');
-        }
-        function closeModal() {
+        };
+
+        window.closeModal = function() {
             document.getElementById('noteModal').classList.remove('show');
-        }
-        async function saveNote() {
-            const title = document.getElementById('noteTitle').value.trim();
-            const text = document.getElementById('noteContent').value.trim();
+        };
+
+        window.saveNote = function() {
+            var title = document.getElementById('noteTitle').value.trim();
+            var text = document.getElementById('noteContent').value.trim();
             if (!title || !text) { alert('请填写完整信息'); return; }
-            if (currentEditIndex >= 0) {
-                allNotes[currentEditIndex].title = title;
-                allNotes[currentEditIndex].text = text;
-                allNotes[currentEditIndex].time = new Date().toLocaleString();
+
+            if (state.currentEditIndex >= 0) {
+                state.notes[state.currentEditIndex].title = title;
+                state.notes[state.currentEditIndex].text = text;
+                state.notes[state.currentEditIndex].time = new Date().toLocaleString();
             } else {
-                allNotes.push({ id: Date.now().toString(), title, text, time: new Date().toLocaleString() });
+                state.notes.push({ id: Date.now().toString(), title: title, text: text, time: new Date().toLocaleString() });
             }
             renderNotes();
-            await saveToCloud();
-            closeModal();
-        }
-        async function deleteNote(index) {
-            if (!confirm('确定要删除这条笔记吗？')) return;
-            allNotes.splice(index, 1);
-            renderNotes();
-            await saveToCloud();
-        }
+            saveToCloud();
+            window.closeModal();
+        };
 
-        window.addEventListener('load', loadFromCloud);
+        window.deleteNote = function(idx) {
+            if (!confirm('确定要删除这条笔记吗？')) return;
+            state.notes.splice(idx, 1);
+            renderNotes();
+            saveToCloud();
+        };
+
+        // ===== 启动 =====
+        console.log('[CloudNote] 页面加载完成');
+        loadFromCloud();
+    })();
     </script>
 </body>
 </html>
