@@ -76,13 +76,24 @@
         const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
         let fileSHA = null, data = { homework: [], tasksConfig: [], pointsConfig: [], pointsLog: [] };
 
+        // ✅ 关键修复：使用 TextDecoder 正确解码 UTF-8 Base64
+        function base64ToUtf8(base64) {
+            const binaryString = atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return new TextDecoder().decode(bytes);
+        }
+
         async function loadFromCloud() {
             try {
                 const res = await fetch(GITEE_API + '?ref=master', { headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN } });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const d = await res.json();
                 fileSHA = d.sha;
-                data = JSON.parse(atob(d.content));
+                const jsonStr = base64ToUtf8(d.content); // ✅ 使用修复后的解码函数
+                data = JSON.parse(jsonStr);
                 renderAll();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
@@ -93,6 +104,7 @@
             if (!fileSHA) { alert('请先刷新页面获取 SHA'); return; }
             try {
                 const jsonStr = JSON.stringify(data, null, 2);
+                // 将 UTF-8 字符串编码为 Base64
                 const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
                 const res = await fetch(GITEE_API, {
                     method: 'PUT',
