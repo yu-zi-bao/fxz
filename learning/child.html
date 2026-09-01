@@ -9,35 +9,25 @@
         body { min-height: 100vh; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 20px; position: relative; }
-        .back-link { position: absolute; top: 5px; left: 0; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
-        h1 { font-size: 24px; color: #667eea; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); }
-        .points-badge { display: inline-block; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); color: #d63031; padding: 10px 30px; border-radius: 25px; font-size: 22px; font-weight: bold; margin: 15px 0; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); border: 3px solid #ffeaa7; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.3); padding: 5px; border-radius: 16px; }
-        .tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 14px; color: #636e72; }
-        .tab.active { background: white; color: #667eea; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
+        .back-link { position: absolute; top: 0; left: 0; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 8px 16px; border-radius: 15px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; color: #667eea; }
+        .points-badge { display: inline-block; background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; padding: 10px 30px; border-radius: 25px; font-size: 24px; font-weight: bold; margin: 10px 0 20px; box-shadow: 0 4px 15px rgba(255,215,0,0.3); }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; text-align: center; background: white; border-radius: 12px; font-size: 14px; font-weight: bold; color: #7f8c8d; cursor: pointer; border: 2px solid #dfe6e9; }
+        .tab.active { color: #667eea; border-color: #667eea; background: #f0f4ff; }
         .section { display: none; }
         .section.active { display: block; }
-        .card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 14px; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); border: 3px solid #dfe6e9; }
-        .card-title { font-size: 16px; font-weight: bold; color: #667eea; }
-        .task-item { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 2px solid #dfe6e9; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .task-item.completed { background: rgba(85,239,196,0.2); border-color: #00b894; }
+        .card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 2px solid #dfe6e9; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #f8f9fa; border-radius: 12px; }
         .task-info { flex: 1; }
-        .task-name { font-weight: bold; color: #333; }
-        .task-points { font-size: 12px; color: #fdcb6e; font-weight: bold; }
-        .check-btn { padding: 8px 18px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
-        .check-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
-        .check-btn.available { background: linear-gradient(135deg, #55efc4, #00b894); color: white; }
-        .check-btn.done { background: #dfe6e9; color: #95a5a6; }
-        .prize-item { background: rgba(255,234,167,0.2); border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 3px solid #ffeaa7; display: flex; justify-content: space-between; align-items: center; }
-        .prize-name { font-weight: bold; font-size: 16px; }
-        .prize-cost { color: #d63031; font-weight: bold; font-size: 14px; }
-        .redeem-btn { padding: 8px 18px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
-        .redeem-btn:disabled { background: #dfe6e9; color: #95a5a6; cursor: not-allowed; }
-        .record-item { background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 8px; border: 2px solid #dfe6e9; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
-        .empty-icon { font-size: 50px; margin-bottom: 10px; }
-        #loading { text-align: center; padding: 30px; color: #667eea; }
-        #error { display: none; background: #ffeaa7; padding: 12px 18px; border-radius: 12px; margin-bottom: 15px; color: #d63031; }
+        .task-name { font-size: 15px; font-weight: bold; color: #333; }
+        .task-points { font-size: 13px; color: #4caf50; margin-top: 4px; }
+        .check-btn { padding: 10px 20px; border: 2px solid #4caf50; background: white; color: #4caf50; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .check-btn.done { background: #4caf50; color: white; cursor: default; }
+        .prize-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: #fff3e0; border-radius: 12px; }
+        .redeem-btn { padding: 8px 16px; border: 2px solid #ff9800; background: white; color: #ff9800; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        #loading { text-align: center; padding: 20px; color: #667eea; }
+        #error { display: none; color: #ff6b6b; padding: 10px; background: #ffe0e0; border-radius: 10px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -46,100 +36,92 @@
             <a href="./" class="back-link">← 返回</a>
             <h1>🎒 学习打卡</h1>
         </div>
+        <div style="text-align:center;"><div class="points-badge" id="total-points">⭐ 0 积分</div></div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('hw')">📚 作业</div>
+            <div class="tab" onclick="switchTab('tasks')">✅ 打卡</div>
+            <div class="tab" onclick="switchTab('redeem')">🎁 兑换</div>
+        </div>
+        <div id="loading">⏳ 正在加载...</div>
         <div id="error"></div>
-        <div id="loading">🔄 正在加载数据...</div>
         <div id="content" style="display:none;">
-            <div style="text-align:center;">
-                <div class="points-badge" id="pointsBadge">⭐ 0 积分</div>
-            </div>
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('today')">📚 今日</div>
-                <div class="tab" onclick="switchTab('checkin')">✅ 打卡</div>
-                <div class="tab" onclick="switchTab('prizes')">🎁 兑换</div>
-            </div>
-            <div id="today" class="section active">
-                <div id="todayHomework"></div>
-            </div>
-            <div id="checkin" class="section">
-                <div class="card">
-                    <div class="card-title" style="margin-bottom:15px;">⭐ 每日打卡任务</div>
-                    <div id="taskList"></div>
-                </div>
-            </div>
-            <div id="prizes" class="section">
-                <div class="card">
-                    <div class="card-title" style="margin-bottom:15px;">🎁 积分兑换商店</div>
-                    <div id="prizeList"></div>
-                </div>
-            </div>
+            <div class="section active" id="section-hw"><div class="card"><div id="hw-content" style="white-space:pre-wrap;line-height:1.8;"></div></div></div>
+            <div class="section" id="section-tasks"><div id="task-list"></div></div>
+            <div class="section" id="section-redeem"><div id="redeem-list"></div></div>
         </div>
     </div>
     <script>
-        const GITEE_CONFIG = { USER: 'fengwolf3', REPO: 'h5-data', TOKEN: '8903f7dbff4a9eabb1d75ce37ba9ec4c', BRANCH: 'master', API: 'https://gitee.com/api/v5/repos' };
-        let data = { homework: [], tasksConfig: [], pointsConfig: [], pointsLog: [], tasks: [] };
-        let currentPoints = 0;
-        const today = new Date().toISOString().split('T')[0];
-        async function loadData() {
+        const GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json';
+        const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
+        let fileSHA = null, data = { homework: [], tasksConfig: [], pointsConfig: [], pointsLog: [], tasks: [] };
+
+        async function loadFromCloud() {
             try {
-                const url = `${GITEE_CONFIG.API}/${GITEE_CONFIG.USER}/${GITEE_CONFIG.REPO}/contents/data/learning.json?ref=${GITEE_CONFIG.BRANCH}`;
-                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${GITEE_CONFIG.TOKEN}` } });
-                if (!res.ok) throw new Error(`云端返回 ${res.status}`);
-                const json = await res.json();
-                data = JSON.parse(atob(json.content));
-                if (!data.tasks) data.tasks = [];
-                if (!data.pointsLog) data.pointsLog = [];
-                calculatePoints();
+                const res = await fetch(GITEE_API + '?ref=master', { headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN } });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const d = await res.json();
+                fileSHA = d.sha;
+                data = JSON.parse(atob(d.content));
                 renderAll();
-            } catch(e) { showError('加载失败：' + e.message); }
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } catch(e) { document.getElementById('error').textContent = '⚠️ 加载失败：' + e.message; document.getElementById('error').style.display = 'block'; document.getElementById('loading').style.display = 'none'; }
         }
-        async function saveData() {
-            const url = `${GITEE_CONFIG.API}/${GITEE_CONFIG.USER}/${GITEE_CONFIG.REPO}/contents/data/learning.json`;
-            const body = { content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))), message: '小朋友打卡', branch: GITEE_CONFIG.BRANCH };
-            const res = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GITEE_CONFIG.TOKEN}` }, body: JSON.stringify(body) });
-            if (!res.ok) throw new Error(`保存失败 ${res.status}`);
+
+        async function saveToCloud() {
+            if (!fileSHA) { alert('请先刷新页面'); return; }
+            try {
+                const jsonStr = JSON.stringify(data, null, 2);
+                const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                const res = await fetch(GITEE_API, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: base64, message: '小朋友打卡更新', branch: 'master', sha: fileSHA })
+                });
+                if (!res.ok) throw new Error('保存失败 ' + res.status);
+            } catch(e) { alert('⚠️ ' + e.message); }
         }
-        function calculatePoints() {
-            currentPoints = data.pointsLog.reduce((sum, l) => sum + (l.type === 'earn' ? l.points : -l.points), 0);
-            document.getElementById('pointsBadge').textContent = `⭐ ${currentPoints} 积分`;
-        }
-        async function doCheckin(taskId) {
-            const task = data.tasksConfig.find(t => t.id === taskId);
-            if (!task) return;
-            const todayTask = data.tasks.find(t => t.taskId === taskId && t.date === today);
-            if (todayTask) { alert('今天已经打过卡啦！'); return; }
-            data.tasks.push({ taskId, taskName: task.name, date: today, points: task.points, time: new Date().toLocaleString('zh-CN') });
-            data.pointsLog.unshift({ type: 'earn', name: task.name, points: task.points, time: new Date().toLocaleString('zh-CN') });
-            await saveData(); calculatePoints(); renderAll();
-            alert(`🎉 打卡成功！获得 ${task.points} 积分`);
-        }
-        async function redeemPrize(prizeId) {
-            const prize = data.pointsConfig.find(p => p.id === prizeId);
-            if (!prize) return;
-            if (currentPoints < prize.cost) { alert('积分不够哦！'); return; }
-            if (!confirm(`确定兑换"${prize.name}"吗？`)) return;
-            data.pointsLog.unshift({ type: 'redeem', name: prize.name, points: prize.cost, time: new Date().toLocaleString('zh-CN') });
-            await saveData(); calculatePoints(); renderAll();
-            alert(`🎉 兑换成功！记得找家长兑现哦～`);
-        }
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
-            document.getElementById(tab).classList.add('active');
-        }
+
+        function switchTab(name) { document.querySelectorAll('.tab').forEach((t,i) => { t.classList.toggle('active', ['hw','tasks','redeem'][i] === name); }); document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById('section-' + name).classList.add('active'); }
+        function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function getTotalPoints() { let total = 0; (data.tasks || []).forEach(t => { if (t.done) { total += (data.tasksConfig || []).find(tc => tc.name === t.taskName)?.points || 0; } }); return total; }
+
         function renderAll() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-            const todayHw = data.homework.filter(h => h.date === today);
-            document.getElementById('todayHomework').innerHTML = todayHw.length ? todayHw.map(h => `<div class="card"><div class="card-title">${h.title}</div><div style="margin-top:8px;padding-top:8px;border-top:2px dashed #dfe6e9;font-size:14px;color:#555;line-height:1.6;">${h.content || '暂无详情'}</div><div style="margin-top:8px;font-size:12px;color:#95a5a6;">📅 ${h.date}</div></div>`).join('') : '<div class="empty-state"><div class="empty-icon">🎉</div><p>今天没有作业，好好休息吧！</p></div>';
-            document.getElementById('taskList').innerHTML = data.tasksConfig.length ? data.tasksConfig.map(t => {
-                const done = data.tasks.find(tk => tk.taskId === t.id && tk.date === today);
-                return `<div class="task-item ${done ? 'completed' : ''}"><div class="task-info"><div class="task-name">${done ? '✅ ' : ''}${t.name}</div><div class="task-points">⭐ +${t.points} 积分</div></div><button class="check-btn ${done ? 'done' : 'available'}" onclick="doCheckin('${t.id}')" ${done ? 'disabled' : ''}>${done ? '已完成' : '打卡'}</button></div>`;
-            }).join('') : '<div class="empty-state"><div class="empty-icon">📝</div><p>还没有打卡任务，等家长配置哦</p></div>';
-            document.getElementById('prizeList').innerHTML = data.pointsConfig.length ? data.pointsConfig.map(p => `<div class="prize-item"><div><div class="prize-name">🎁 ${p.name}</div><div class="prize-cost">需要 ${p.cost} 积分</div></div><button class="redeem-btn" onclick="redeemPrize('${p.id}')" ${currentPoints < p.cost ? 'disabled' : ''}>${currentPoints < p.cost ? '积分不足' : '兑换'}</button></div>`).join('') : '<div class="empty-state"><div class="empty-icon">🎁</div><p>还没有奖品，等家长添加哦</p></div>';
+            const hw = (data.homework || []).pop();
+            document.getElementById('hw-content').innerHTML = hw ? '<div style="font-size:16px;line-height:1.8;">' + esc(hw.content) + '</div><div style="font-size:12px;color:#999;margin-top:10px;">🕐 ' + hw.time + '</div>' : '<div style="color:#999;text-align:center;">📭 暂无作业</div>';
+            document.getElementById('total-points').textContent = '⭐ ' + getTotalPoints() + ' 积分';
+            const today = new Date().toLocaleDateString();
+            document.getElementById('task-list').innerHTML = (data.tasksConfig || []).map(tc => {
+                const todayTask = (data.tasks || []).find(t => t.taskName === tc.name && t.date === today);
+                return '<div class="task-item"><div class="task-info"><div class="task-name">' + esc(tc.name) + '</div><div class="task-points">完成奖励：+' + tc.points + ' 积分</div></div><button class="check-btn ' + (todayTask?.done ? 'done' : '') + '" onclick="checkTask(\'' + tc.name + '\',' + tc.points + ')">' + (todayTask?.done ? '✅ 已完成' : '☑️ 打卡') + '</button></div>';
+            }).join('') || '<div style="color:#999;text-align:center;padding:20px;">暂无任务配置</div>';
+            const points = getTotalPoints();
+            document.getElementById('redeem-list').innerHTML = (data.pointsConfig || []).map(p => '<div class="prize-item"><div><div style="font-weight:bold;">' + esc(p.name) + '</div><div style="font-size:13px;color:#ff9800;">需要 ' + p.cost + ' 积分</div></div><button class="redeem-btn" onclick="redeemPrize(\'' + p.name + ',' + p.cost + '\')">🎁 兑换</button></div>').join('') || '<div style="color:#999;text-align:center;padding:20px;">暂无奖品</div>';
         }
-        function showError(msg) { const el = document.getElementById('error'); el.textContent = '⚠️ ' + msg; el.style.display = 'block'; document.getElementById('loading').style.display = 'none'; }
-        window.onload = loadData;
+
+        async function checkTask(name, points) {
+            if (!data.tasks) data.tasks = [];
+            const today = new Date().toLocaleDateString();
+            if (!data.tasks.find(t => t.taskName === name && t.date === today)) {
+                data.tasks.push({ taskName: name, points: points, date: today, done: true, time: new Date().toLocaleString() });
+                alert('🎉 打卡成功！+' + points + ' 积分');
+                renderAll();
+                await saveToCloud();
+            }
+        }
+
+        async function redeemPrize(prizeInfo) {
+            const [name, cost] = prizeInfo.split(',');
+            if (getTotalPoints() < parseInt(cost)) { alert('积分不够哦，继续加油！💪'); return; }
+            if (!confirm('确定要用 ' + cost + ' 积分兑换"' + name + '"吗？')) return;
+            if (!data.pointsLog) data.pointsLog = [];
+            data.pointsLog.push({ action: '兑换了 ' + name + ' (-' + cost + '积分)', time: new Date().toLocaleString() });
+            renderAll();
+            await saveToCloud();
+            alert('🎉 兑换成功！');
+        }
+
+        window.addEventListener('load', loadFromCloud);
     </script>
 </body>
 </html>
