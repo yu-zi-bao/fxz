@@ -9,29 +9,27 @@
         body { min-height: 100vh; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 25px; position: relative; }
-        .back-link { position: absolute; top: 5px; left: 0; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
+        .back-link { position: absolute; top: 0; left: 0; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 8px 16px; border-radius: 15px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
         h1 { font-size: 26px; color: #667eea; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); }
-        .input-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); border: 3px solid #dfe6e9; }
-        input, textarea { width: 100%; padding: 12px 16px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 15px; margin-bottom: 12px; font-family: inherit; transition: 0.3s; background: #f8f9fa; }
-        input:focus, textarea:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
-        textarea { height: 80px; resize: vertical; }
-        .btn { padding: 12px 28px; border: none; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-family: inherit; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
-        .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
-        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .btn-danger { background: #ff6b6b; color: white; }
-        .btn-edit { background: #feca57; color: #333; }
-        .note-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); border: 3px solid #dfe6e9; transition: 0.3s; }
-        .note-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(102,126,234,0.2); }
-        .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .note-title { font-weight: bold; color: #667eea; font-size: 16px; }
-        .note-time { color: #95a5a6; font-size: 12px; }
-        .note-content { color: #555; margin-bottom: 12px; line-height: 1.6; }
-        .note-actions { display: flex; gap: 8px; }
-        .note-actions .btn { padding: 6px 16px; font-size: 13px; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #95a5a6; }
-        .empty-icon { font-size: 64px; margin-bottom: 15px; }
-        #loading { text-align: center; padding: 30px; font-size: 15px; color: #667eea; }
-        #error { display: none; background: #ffeaa7; padding: 12px 18px; border-radius: 12px; margin-bottom: 15px; color: #d63031; border: 2px solid #fdcb6e; }
+        .btn { width: 100%; padding: 14px; border: 3px solid #667eea; background: white; border-radius: 15px; font-size: 16px; font-weight: bold; color: #667eea; cursor: pointer; margin-bottom: 15px; box-shadow: 4px 4px 0 rgba(102,126,234,0.2); transition: all 0.3s; }
+        .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(102,126,234,0.2); }
+        .note-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 2px solid #dfe6e9; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+        .note-title { font-size: 18px; font-weight: bold; color: #667eea; margin-bottom: 6px; }
+        .note-text { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
+        .note-time { font-size: 12px; color: #999; }
+        .note-actions { text-align: right; margin-top: 10px; }
+        .note-actions button { background: none; border: 2px solid #dfe6e9; border-radius: 10px; padding: 6px 14px; margin-left: 8px; cursor: pointer; font-size: 13px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; width: 92%; max-width: 480px; }
+        .modal h2 { font-size: 22px; color: #667eea; margin-bottom: 20px; text-align: center; }
+        .modal input, .modal textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 15px; margin-bottom: 15px; }
+        .modal textarea { min-height: 150px; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons button { flex: 1; padding: 12px; border: 2px solid #667eea; background: white; border-radius: 12px; font-size: 15px; font-weight: bold; color: #667eea; cursor: pointer; }
+        .modal-buttons button.save { background: #667eea; color: white; }
+        #loading { text-align: center; padding: 20px; color: #667eea; }
+        #error { display: none; text-align: center; color: #ff6b6b; padding: 10px; background: #ffe0e0; border-radius: 10px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -40,91 +38,77 @@
             <a href="../" class="back-link">← 返回</a>
             <h1>📝 云端记事本</h1>
         </div>
+        <button class="btn" onclick="openModal()">✨ 新增笔记</button>
+        <div id="loading">⏳ 正在从云端加载数据...</div>
         <div id="error"></div>
-        <div id="loading">🔄 正在加载云端数据...</div>
-        <div id="content" style="display:none;">
-            <div class="input-card">
-                <input type="text" id="noteTitle" placeholder="✏️ 输入标题...">
-                <textarea id="noteContent" placeholder="写下你的想法..."></textarea>
-                <div style="display:flex;gap:10px;">
-                    <button class="btn btn-primary" onclick="saveNote()">💾 保存到云端</button>
-                    <button class="btn btn-danger" id="editBtn" style="display:none;" onclick="toggleEdit()">取消编辑</button>
-                </div>
+        <div id="content" style="display:none;"><div id="notes-list"></div></div>
+    </div>
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">✨ 新增笔记</h2>
+            <input type="text" id="noteTitle" placeholder="笔记标题...">
+            <textarea id="noteContent" placeholder="输入笔记内容..."></textarea>
+            <div class="modal-buttons">
+                <button onclick="closeModal()">取消</button>
+                <button class="save" onclick="saveNote()">💾 保存</button>
             </div>
-            <div id="noteList"></div>
         </div>
     </div>
     <script>
-        const GITEE_CONFIG = { USER: 'fengwolf3', REPO: 'h5-data', TOKEN: '8903f7dbff4a9eabb1d75ce37ba9ec4c', BRANCH: 'master', API: 'https://gitee.com/api/v5/repos' };
-        let notes = [];
-        let editId = null;
-        async function loadNotes() {
+        const GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/notepad.json';
+        const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
+        let fileSHA = null, allNotes = [], editIndex = -1;
+
+        async function loadFromCloud() {
             try {
-                const url = `${GITEE_CONFIG.API}/${GITEE_CONFIG.USER}/${GITEE_CONFIG.REPO}/contents/data/notepad.json?ref=${GITEE_CONFIG.BRANCH}`;
-                const res = await fetch(url, { headers: { 'Authorization': `Bearer ${GITEE_CONFIG.TOKEN}` } });
-                if (!res.ok) throw new Error(`云端返回 ${res.status}`);
+                const res = await fetch(GITEE_API + '?ref=master', { headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN } });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                const json = JSON.parse(atob(data.content));
-                notes = json.notes || [];
+                fileSHA = data.sha;
+                allNotes = JSON.parse(atob(data.content)).notes || [];
                 renderNotes();
-            } catch(e) {
-                document.getElementById('error').textContent = '⚠️ 加载失败：' + e.message;
-                document.getElementById('error').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } catch(e) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '⚠️ 加载失败：' + e.message;
             }
         }
-        async function saveNotes() {
-            const json = { notes: notes };
-            const url = `${GITEE_CONFIG.API}/${GITEE_CONFIG.USER}/${GITEE_CONFIG.REPO}/contents/data/notepad.json`;
-            const body = { content: btoa(unescape(encodeURIComponent(JSON.stringify(json, null, 2)))), message: '更新笔记', branch: GITEE_CONFIG.BRANCH };
-            const res = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GITEE_CONFIG.TOKEN}` }, body: JSON.stringify(body) });
-            if (!res.ok) throw new Error(`保存失败 ${res.status}`);
+
+        async function saveToCloud() {
+            if (!fileSHA) { document.getElementById('error').textContent = '⚠️ 请先刷新页面'; return; }
+            try {
+                const jsonStr = JSON.stringify({ notes: allNotes }, null, 2);
+                const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                const res = await fetch(GITEE_API, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: base64, message: '更新记事本', branch: 'master', sha: fileSHA })
+                });
+                if (!res.ok) throw new Error('保存失败 ' + res.status);
+            } catch(e) { document.getElementById('error').textContent = '⚠️ ' + e.message; }
         }
-        function saveNote() {
-            const title = document.getElementById('noteTitle').value.trim();
-            const content = document.getElementById('noteContent').value.trim();
-            if (!title) { alert('请填写标题'); return; }
-            if (editId) {
-                const idx = notes.findIndex(n => n.id === editId);
-                if (idx !== -1) { notes[idx].title = title; notes[idx].content = content; notes[idx].updatedAt = new Date().toLocaleString('zh-CN'); }
-                editId = null;
-                document.getElementById('editBtn').style.display = 'none';
-            } else {
-                notes.unshift({ id: 'n' + Date.now(), title, content, createdAt: new Date().toLocaleString('zh-CN'), updatedAt: new Date().toLocaleString('zh-CN') });
-            }
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-            saveNotes().then(() => renderNotes()).catch(e => alert('保存失败：' + e.message));
-        }
-        function toggleEdit() {
-            editId = null;
-            document.getElementById('editBtn').style.display = 'none';
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-        }
-        function editNote(id) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                document.getElementById('noteTitle').value = note.title;
-                document.getElementById('noteContent').value = note.content;
-                editId = id;
-                document.getElementById('editBtn').style.display = 'inline-block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-        function deleteNote(id) {
-            if (confirm('确定删除这条笔记？')) {
-                notes = notes.filter(n => n.id !== id);
-                saveNotes().then(() => renderNotes()).catch(e => alert('删除失败：' + e.message));
-            }
-        }
+
         function renderNotes() {
-            const html = notes.length ? notes.map(n => `<div class="note-card"><div class="note-header"><span class="note-title">${n.title}</span><span class="note-time">${n.updatedAt}</span></div><div class="note-content">${n.content || '暂无内容'}</div><div class="note-actions"><button class="btn btn-edit" onclick="editNote('${n.id}')">✏️ 编辑</button><button class="btn btn-danger" onclick="deleteNote('${n.id}')">🗑️ 删除</button></div></div>`).join('') : `<div class="empty-state"><div class="empty-icon">📝</div><p>还没有笔记哦，点击上方按钮开始记录吧！</p></div>`;
-            document.getElementById('noteList').innerHTML = html;
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
+            const container = document.getElementById('notes-list');
+            if (allNotes.length === 0) { container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">📭 还没有笔记</div>'; return; }
+            container.innerHTML = allNotes.reverse().map((n, i) => '<div class="note-card"><div class="note-title">' + esc(n.title) + '</div><div class="note-text">' + esc(n.text) + '</div><div class="note-time">🕐 ' + n.time + '</div><div class="note-actions"><button onclick="editNote(' + (allNotes.length-1-i) + ')">✏️ 编辑</button><button onclick="deleteNote(' + (allNotes.length-1-i) + ')">🗑️ 删除</button></div></div>').join('');
         }
-        window.onload = loadNotes;
+
+        function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function openModal() { editIndex = -1; document.getElementById('modalTitle').textContent = '✨ 新增笔记'; document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = ''; document.getElementById('noteModal').classList.add('show'); }
+        function editNote(i) { editIndex = i; document.getElementById('modalTitle').textContent = '✏️ 编辑笔记'; document.getElementById('noteTitle').value = allNotes[i].title; document.getElementById('noteContent').value = allNotes[i].text; document.getElementById('noteModal').classList.add('show'); }
+        function closeModal() { document.getElementById('noteModal').classList.remove('show'); }
+        async function saveNote() {
+            const t = document.getElementById('noteTitle').value.trim(), c = document.getElementById('noteContent').value.trim();
+            if (!t || !c) { alert('请填写完整'); return; }
+            if (editIndex >= 0) { allNotes[editIndex].title = t; allNotes[editIndex].text = c; allNotes[editIndex].time = new Date().toLocaleString(); }
+            else { allNotes.push({ id: Date.now().toString(), title: t, text: c, time: new Date().toLocaleString() }); }
+            renderNotes(); await saveToCloud(); closeModal();
+        }
+        async function deleteNote(i) { if (!confirm('确定删除？')) return; allNotes.splice(i, 1); renderNotes(); await saveToCloud(); }
+        window.addEventListener('load', loadFromCloud);
     </script>
 </body>
 </html>
