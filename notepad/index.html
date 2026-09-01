@@ -5,156 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>云端记事本</title>
     <style>
-        body { margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
-        .container { width: 95%; max-width: 600px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-        h1 { text-align: center; margin-bottom: 20px; }
-        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: none; outline: none; background: rgba(255,255,255,0.9); margin-bottom: 10px; box-sizing: border-box; }
-        button { padding: 10px 15px; border-radius: 8px; border: none; background: #ff7e5f; color: white; cursor: pointer; font-weight: bold; }
-        .note-card { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .note-title { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
-        .note-date { font-size: 12px; opacity: 0.7; margin-bottom: 10px; }
-        .note-content { font-size: 14px; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
-        .note-actions { text-align: right; }
-        .btn-delete { background: #ff4757; font-size: 12px; padding: 5px 10px; }
-        .back-btn { display: block; text-align: center; margin-top: 20px; text-decoration: none; color: white; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; }
-        .loading { text-align: center; padding: 20px; opacity: 0.8; }
-        .error-box { background: rgba(255,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; color: white; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 25px; position: relative; }
+        .back-link { position: absolute; top: 0; left: 0; color: white; text-decoration: none; opacity: 0.8; font-size: 14px; }
+        .header h1 { font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .input-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .input-box input, .input-box textarea { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 12px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); color: white; font-size: 14px; }
+        .input-box textarea { min-height: 80px; width: 100%; flex: auto; resize: vertical; }
+        .input-box input::placeholder, .input-box textarea::placeholder { color: rgba(255,255,255,0.5); }
+        .btn { padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: bold; transition: transform 0.2s; background: rgba(255,255,255,0.9); color: #764ba2; }
+        .btn:active { transform: scale(0.96); }
+        .note-card { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); }
+        .note-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .note-content { font-size: 14px; opacity: 0.9; margin-bottom: 8px; white-space: pre-wrap; }
+        .note-footer { display: flex; justify-content: space-between; align-items: center; }
+        .note-date { font-size: 12px; opacity: 0.6; }
+        .note-actions { display: flex; gap: 6px; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 8px; }
+        .btn-edit { background: rgba(251,191,36,0.8); color: white; }
+        .btn-del { background: rgba(239,68,68,0.8); color: white; }
+        .empty { text-align: center; padding: 40px 20px; opacity: 0.7; }
+        .status { text-align: center; font-size: 12px; opacity: 0.7; margin-bottom: 10px; min-height: 18px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 云端记事本</h1>
-        <div id="loading" class="loading">⏳ 正在连接云端数据...</div>
-        <div id="error" class="error-box" style="display:none;"></div>
-        
-        <div id="content" style="display: none;">
-            <div class="input-group">
-                <input type="text" id="noteTitle" placeholder="标题...">
-                <textarea id="noteContent" rows="3" placeholder="内容..."></textarea>
-                <button onclick="addNote()">保存到云端</button>
-            </div>
-            <div id="notesList"></div>
-            <a href="https://yu-zi-bao.github.io/fxz/" class="back-btn">🏠 返回首页</a>
+        <div class="header">
+            <a href="../" class="back-link">← 返回</a>
+            <h1>📝 云端记事本</h1>
         </div>
+        <div class="input-box">
+            <input type="text" id="title" placeholder="标题...">
+            <textarea id="content" placeholder="内容..."></textarea>
+            <button class="btn" id="saveBtn" onclick="saveNote()">✨ 保存</button>
+        </div>
+        <div class="status" id="status"></div>
+        <div id="list"></div>
     </div>
+<script>
+const GITEE = { user:'yusunhui', repo:'h5-data', token:'8903f7dbff4a9eabb1d75ce37ba9ec4c', branch:'master', path:'data/notepad.json' };
+let notes = [], editId = null;
 
-    <script>
-        // Gitee 云端配置
-        const GITEE_USER = 'yusunhui';
-        const GITEE_REPO = 'h5-data';
-        const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
-        const GITEE_FILE_NOTEPAD = 'data/notepad.json';
-        const GITEE_API = 'https://gitee.com/api/v5/repos';
-        const BRANCH = 'master';
+async function load() {
+    const s = document.getElementById('status'); s.textContent = '⏳ 加载中...';
+    try {
+        const url = `https://gitee.com/api/v5/repos/${GITEE.user}/${GITEE.repo}/contents/${GITEE.path}?ref=${GITEE.branch}`;
+        const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + GITEE.token } });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        notes = JSON.parse(atob(j.content)).notes || [];
+        s.textContent = '✅ 加载成功';
+    } catch(e) { s.textContent = '⚠️ 失败: ' + e.message; console.error(e); }
+    render();
+}
 
-        let notes = [];
+async function saveCloud() {
+    const s = document.getElementById('status'); s.textContent = '⏳ 保存中...';
+    try {
+        const content = btoa(JSON.stringify({ notes }, null, 2));
+        const url = `https://gitee.com/api/v5/repos/${GITEE.user}/${GITEE.repo}/contents/${GITEE.path}`;
+        const r = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GITEE.token },
+            body: JSON.stringify({ content, message: '更新记事本', branch: GITEE.branch })
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        s.textContent = '✅ 已保存';
+        setTimeout(() => s.textContent = '', 2000);
+    } catch(e) { s.textContent = '⚠️ 保存失败: ' + e.message; console.error(e); }
+}
 
-        // 读取云端数据
-        async function loadFromCloud() {
-            try {
-                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}?ref=${BRANCH}`;
-                const res = await fetch(url, {
-                    headers: { 'Authorization': `token ${GITEE_TOKEN}` }
-                });
-                if (!res.ok) {
-                    throw new Error(`API 返回 ${res.status}: ${res.statusText}`);
-                }
-                const data = await res.json();
-                const decoded = JSON.parse(atob(data.content));
-                return decoded.notes || [];
-            } catch(e) {
-                showError('加载云端数据失败：' + e.message);
-                return [];
-            }
-        }
+function saveNote() {
+    const t = document.getElementById('title').value.trim();
+    const c = document.getElementById('content').value.trim();
+    if (!t) { alert('请输入标题'); return; }
+    if (editId) {
+        const n = notes.find(x => x.id === editId);
+        if (n) { n.title = t; n.content = c; n.updated = new Date().toLocaleString(); }
+        editId = null; document.getElementById('saveBtn').textContent = '✨ 保存';
+    } else {
+        notes.unshift({ id: Date.now().toString(), title: t, content: c, created: new Date().toLocaleString(), updated: new Date().toLocaleString() });
+    }
+    document.getElementById('title').value = ''; document.getElementById('content').value = '';
+    render(); saveCloud();
+}
 
-        // 写入云端数据
-        async function saveToCloud(data) {
-            try {
-                const url = `${GITEE_API}/${GITEE_USER}/${GITEE_REPO}/contents/${GITEE_FILE_NOTEPAD}`;
-                const body = {
-                    content: btoa(JSON.stringify({ notes: data })),
-                    message: '更新记事本：' + new Date().toLocaleString(),
-                    branch: BRANCH
-                };
-                const res = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITEE_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (!res.ok) {
-                    const errData = await res.json();
-                    throw new Error(errData.message || `API 返回 ${res.status}`);
-                }
-            } catch(e) {
-                showError('保存失败：' + e.message);
-            }
-        }
+function edit(id) {
+    const n = notes.find(x => x.id === id);
+    if (!n) return;
+    document.getElementById('title').value = n.title;
+    document.getElementById('content').value = n.content;
+    editId = id; document.getElementById('saveBtn').textContent = '💾 修改';
+}
 
-        // 显示错误
-        function showError(msg) {
-            const el = document.getElementById('error');
-            el.textContent = msg;
-            el.style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-        }
+function del(id) {
+    if (!confirm('确定删除？')) return;
+    notes = notes.filter(x => x.id !== id);
+    if (editId === id) { editId = null; document.getElementById('title').value = ''; document.getElementById('content').value = ''; document.getElementById('saveBtn').textContent = '✨ 保存'; }
+    render(); saveCloud();
+}
 
-        // 初始化
-        async function init() {
-            notes = await loadFromCloud();
-            render();
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-        }
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
-        // 渲染列表
-        function render() {
-            const html = notes.sort((a,b) => b.time - a.time).map(n => `
-                <div class="note-card">
-                    <div class="note-title">${escapeHtml(n.title)}</div>
-                    <div class="note-date">${new Date(n.time).toLocaleString()}</div>
-                    <div class="note-content">${escapeHtml(n.content)}</div>
-                    <div class="note-actions"><button class="btn-delete" onclick="deleteNote('${n.id}')">删除</button></div>
-                </div>
-            `).join('');
-            document.getElementById('notesList').innerHTML = html || '<div style="text-align:center; opacity:0.6">暂无笔记，请先添加</div>';
-        }
+function render() {
+    const l = document.getElementById('list');
+    if (!notes.length) { l.innerHTML = '<div class="empty">📭 还没有笔记</div>'; return; }
+    l.innerHTML = notes.map(n => `<div class="note-card"><div class="note-title">${esc(n.title)}</div><div class="note-content">${esc(n.content)}</div><div class="note-footer"><span class="note-date">🕐 ${esc(n.updated)}</span><div class="note-actions"><button class="btn btn-sm btn-edit" onclick="edit('${n.id}')">编辑</button><button class="btn btn-sm btn-del" onclick="del('${n.id}')">删除</button></div></div></div>`).join('');
+}
 
-        // 添加笔记
-        async function addNote() {
-            const title = document.getElementById('noteTitle').value.trim();
-            const content = document.getElementById('noteContent').value.trim();
-            if (!title) { alert('请输入标题'); return; }
-            
-            notes.push({ id: Date.now().toString(), title, content, time: Date.now() });
-            await saveToCloud(notes);
-            
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-            render();
-        }
-
-        // 删除笔记
-        async function deleteNote(id) {
-            if (!confirm('确认删除？')) return;
-            notes = notes.filter(n => n.id !== id);
-            await saveToCloud(notes);
-            render();
-        }
-
-        // HTML 转义
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        init();
-    </script>
+load();
+</script>
 </body>
 </html>
