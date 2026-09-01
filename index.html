@@ -3,36 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XiaoYu H5 发布中心 (云端版)</title>
+    <title>XiaoYu H5 发布中心</title>
     <style>
-        body { margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
-        .container { width: 95%; max-width: 600px; text-align: center; }
-        h1 { margin-bottom: 30px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2); text-align: left; cursor: pointer; transition: transform 0.2s; display: block; text-decoration: none; color: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 30px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .container { width: 92%; max-width: 580px; text-align: center; }
+        h1 { font-size: 28px; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .subtitle { font-size: 14px; opacity: 0.8; margin-bottom: 30px; }
+        .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border-radius: 16px; padding: 22px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.25); text-align: left; cursor: pointer; transition: all 0.3s ease; display: block; text-decoration: none; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); background: rgba(255, 255, 255, 0.2); }
         .card:active { transform: scale(0.98); }
-        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-        .card-desc { font-size: 14px; opacity: 0.8; }
-        .qr-section { margin-top: 40px; }
-        .qr-section img { width: 120px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .qr-tip { font-size: 12px; opacity: 0.8; margin-top: 10px; }
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .card-desc { font-size: 13px; opacity: 0.85; }
+        .card-icon { font-size: 22px; }
+        .qr-section { margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 16px; }
+        .qr-section img { width: 130px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .qr-tip { font-size: 13px; opacity: 0.85; margin-top: 12px; }
+        .footer { margin-top: 20px; font-size: 12px; opacity: 0.5; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚀 XiaoYu H5 发布中心</h1>
+        <div class="subtitle">手机电脑实时同步 · 随时随地访问</div>
         
         <a href="./notepad/" class="card">
-            <div class="card-title">📝 云端记事本</div>
-            <div class="card-desc">手机电脑实时同步的备忘录</div>
+            <div class="card-title"><span class="card-icon">📝</span> 云端记事本</div>
+            <div class="card-desc">多设备实时同步的备忘录</div>
         </a>
 
         <a href="./learning/" class="card">
-            <div class="card-title">🎓 学习管理平台</div>
-            <div class="card-desc">每日作业发布、打卡与积分兑换</div>
+            <div class="card-title"><span class="card-icon">🎓</span> 学习管理</div>
+            <div class="card-desc">作业发布 · 每日打卡 · 积分兑换</div>
         </a>
 
         <a href="./exam/" class="card">
-            <div class="card-title">📖 在线考试</div>
+            <div class="card-title"><span class="card-icon">📖</span> 在线考试</div>
             <div class="card-desc">答题练习功能（即将更新）</div>
         </a>
 
@@ -40,6 +46,8 @@
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://yu-zi-bao.github.io/fxz/" alt="扫码查看">
             <div class="qr-tip">📱 手机扫码即可在移动端同步访问</div>
         </div>
+
+        <div class="footer">云端存储 by Gitee ✨</div>
     </div>
 </body>
 </html>
