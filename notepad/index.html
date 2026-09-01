@@ -10,26 +10,33 @@
         .container { max-width: 600px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 25px; position: relative; }
         .back-link { position: absolute; top: 0; left: 0; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 8px 16px; border-radius: 15px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
+        .back-link:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 rgba(102,126,234,0.2); }
         h1 { font-size: 26px; color: #667eea; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); }
-        .btn { width: 100%; padding: 14px; border: 3px solid #667eea; background: white; border-radius: 15px; font-size: 16px; font-weight: bold; color: #667eea; cursor: pointer; margin-bottom: 15px; box-shadow: 4px 4px 0 rgba(102,126,234,0.2); transition: all 0.3s; }
+        .btn { width: 100%; padding: 14px; border: 3px solid #667eea; background: white; border-radius: 15px; font-size: 16px; font-weight: bold; color: #667eea; cursor: pointer; margin-bottom: 15px; transition: all 0.3s; box-shadow: 4px 4px 0 rgba(102,126,234,0.2); }
         .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(102,126,234,0.2); }
+        .btn:active { transform: translate(0, 0); box-shadow: 2px 2px 0 rgba(102,126,234,0.2); }
         .note-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 2px solid #dfe6e9; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
         .note-title { font-size: 18px; font-weight: bold; color: #667eea; margin-bottom: 6px; }
         .note-text { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
         .note-time { font-size: 12px; color: #999; }
         .note-actions { text-align: right; margin-top: 10px; }
-        .note-actions button { background: none; border: 2px solid #dfe6e9; border-radius: 10px; padding: 6px 14px; margin-left: 8px; cursor: pointer; font-size: 13px; }
+        .note-actions button { background: none; border: 2px solid #dfe6e9; border-radius: 10px; padding: 6px 14px; margin-left: 8px; cursor: pointer; font-size: 13px; color: #777; }
+        .note-actions button:hover { border-color: #667eea; color: #667eea; }
+        .note-actions button.del:hover { border-color: #ff6b6b; color: #ff6b6b; }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 20px; padding: 30px; width: 92%; max-width: 480px; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; width: 92%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal h2 { font-size: 22px; color: #667eea; margin-bottom: 20px; text-align: center; }
-        .modal input, .modal textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 15px; margin-bottom: 15px; }
-        .modal textarea { min-height: 150px; }
+        .modal input, .modal textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 15px; margin-bottom: 15px; font-family: inherit; }
+        .modal input:focus, .modal textarea:focus { border-color: #667eea; outline: none; }
+        .modal textarea { min-height: 150px; resize: vertical; }
         .modal-buttons { display: flex; gap: 10px; }
         .modal-buttons button { flex: 1; padding: 12px; border: 2px solid #667eea; background: white; border-radius: 12px; font-size: 15px; font-weight: bold; color: #667eea; cursor: pointer; }
         .modal-buttons button.save { background: #667eea; color: white; }
-        #loading { text-align: center; padding: 20px; color: #667eea; }
-        #error { display: none; text-align: center; color: #ff6b6b; padding: 10px; background: #ffe0e0; border-radius: 10px; margin-bottom: 15px; }
+        .modal-buttons button.save:hover { background: #5a67d8; }
+        #loading { text-align: center; padding: 20px; color: #667eea; font-size: 16px; }
+        #error { display: none; text-align: center; color: #ff6b6b; font-size: 14px; padding: 10px; background: #ffe0e0; border-radius: 10px; margin-bottom: 15px; }
+        .empty { text-align: center; color: #999; padding: 40px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -38,11 +45,16 @@
             <a href="../" class="back-link">← 返回</a>
             <h1>📝 云端记事本</h1>
         </div>
+
         <button class="btn" onclick="openModal()">✨ 新增笔记</button>
+        
         <div id="loading">⏳ 正在从云端加载数据...</div>
         <div id="error"></div>
-        <div id="content" style="display:none;"><div id="notes-list"></div></div>
+        <div id="content" style="display:none;">
+            <div id="notes-list"></div>
+        </div>
     </div>
+
     <div class="modal" id="noteModal">
         <div class="modal-content">
             <h2 id="modalTitle">✨ 新增笔记</h2>
@@ -50,65 +62,167 @@
             <textarea id="noteContent" placeholder="输入笔记内容..."></textarea>
             <div class="modal-buttons">
                 <button onclick="closeModal()">取消</button>
-                <button class="save" onclick="saveNote()">💾 保存</button>
+                <button class="save" onclick="saveNote()">💾 保存到云端</button>
             </div>
         </div>
     </div>
+
     <script>
+        // ========== Gitee 云端同步配置 ==========
         const GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/notepad.json';
         const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
-        let fileSHA = null, allNotes = [], editIndex = -1;
+        let fileSHA = null;
 
+        // ========== 云端加载 ==========
         async function loadFromCloud() {
             try {
-                const res = await fetch(GITEE_API + '?ref=master', { headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN } });
+                const res = await fetch(GITEE_API + '?ref=master', {
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN }
+                });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                fileSHA = data.sha;
-                allNotes = JSON.parse(atob(data.content)).notes || [];
-                renderNotes();
+                fileSHA = data.sha; // 保存 SHA，用于后续更新
+                const content = JSON.parse(atob(data.content));
+                renderNotes(content.notes || []);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
             } catch(e) {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = '⚠️ 加载失败：' + e.message;
+                document.getElementById('error').textContent = '⚠️ 加载云端数据失败：' + e.message;
             }
         }
 
-        async function saveToCloud() {
-            if (!fileSHA) { document.getElementById('error').textContent = '⚠️ 请先刷新页面'; return; }
+        // ========== 云端保存（带 SHA） ==========
+        async function saveToCloud(notes) {
+            if (!fileSHA) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '⚠️ 未获取到文件 SHA，请先刷新页面';
+                return;
+            }
             try {
-                const jsonStr = JSON.stringify({ notes: allNotes }, null, 2);
+                const jsonStr = JSON.stringify({ notes: notes }, null, 2);
                 const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
                 const res = await fetch(GITEE_API, {
                     method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: base64, message: '更新记事本', branch: 'master', sha: fileSHA })
+                    headers: {
+                        'Authorization': 'Bearer ' + GITEE_TOKEN,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: base64,
+                        message: '更新记事本：' + new Date().toLocaleString(),
+                        branch: 'master',
+                        sha: fileSHA // ✅ 关键修复：带上 SHA
+                    })
                 });
-                if (!res.ok) throw new Error('保存失败 ' + res.status);
-            } catch(e) { document.getElementById('error').textContent = '⚠️ ' + e.message; }
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error('保存失败 ' + res.status + ': ' + errText.substring(0, 100));
+                }
+                document.getElementById('error').style.display = 'none';
+            } catch(e) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '⚠️ ' + e.message;
+            }
         }
 
-        function renderNotes() {
+        // ========== 渲染笔记列表 ==========
+        function renderNotes(notes) {
             const container = document.getElementById('notes-list');
-            if (allNotes.length === 0) { container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">📭 还没有笔记</div>'; return; }
-            container.innerHTML = allNotes.reverse().map((n, i) => '<div class="note-card"><div class="note-title">' + esc(n.title) + '</div><div class="note-text">' + esc(n.text) + '</div><div class="note-time">🕐 ' + n.time + '</div><div class="note-actions"><button onclick="editNote(' + (allNotes.length-1-i) + ')">✏️ 编辑</button><button onclick="deleteNote(' + (allNotes.length-1-i) + ')">🗑️ 删除</button></div></div>').join('');
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="empty">📭 还没有笔记哦，点击上方按钮创建第一条！</div>';
+                return;
+            }
+            container.innerHTML = notes.reverse().map((note, i) => `
+                <div class="note-card">
+                    <div class="note-title">${escapeHtml(note.title)}</div>
+                    <div class="note-text">${escapeHtml(note.text)}</div>
+                    <div class="note-time">🕐 ${note.time}</div>
+                    <div class="note-actions">
+                        <button onclick="editNote(${notes.length - 1 - i})">✏️ 编辑</button>
+                        <button class="del" onclick="deleteNote(${notes.length - 1 - i})">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-        function openModal() { editIndex = -1; document.getElementById('modalTitle').textContent = '✨ 新增笔记'; document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = ''; document.getElementById('noteModal').classList.add('show'); }
-        function editNote(i) { editIndex = i; document.getElementById('modalTitle').textContent = '✏️ 编辑笔记'; document.getElementById('noteTitle').value = allNotes[i].title; document.getElementById('noteContent').value = allNotes[i].text; document.getElementById('noteModal').classList.add('show'); }
-        function closeModal() { document.getElementById('noteModal').classList.remove('show'); }
-        async function saveNote() {
-            const t = document.getElementById('noteTitle').value.trim(), c = document.getElementById('noteContent').value.trim();
-            if (!t || !c) { alert('请填写完整'); return; }
-            if (editIndex >= 0) { allNotes[editIndex].title = t; allNotes[editIndex].text = c; allNotes[editIndex].time = new Date().toLocaleString(); }
-            else { allNotes.push({ id: Date.now().toString(), title: t, text: c, time: new Date().toLocaleString() }); }
-            renderNotes(); await saveToCloud(); closeModal();
+        // ========== 转义 HTML ==========
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        async function deleteNote(i) { if (!confirm('确定删除？')) return; allNotes.splice(i, 1); renderNotes(); await saveToCloud(); }
-        window.addEventListener('load', loadFromCloud);
+
+        // ========== 编辑/删除 ==========
+        let currentEditIndex = -1;
+        let allNotes = [];
+
+        function openModal() {
+            currentEditIndex = -1;
+            document.getElementById('modalTitle').textContent = '✨ 新增笔记';
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('noteModal').classList.add('show');
+        }
+
+        function editNote(index) {
+            currentEditIndex = index;
+            const note = allNotes[index];
+            document.getElementById('modalTitle').textContent = '✏️ 编辑笔记';
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.text;
+            document.getElementById('noteModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('noteModal').classList.remove('show');
+        }
+
+        async function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const text = document.getElementById('noteContent').value.trim();
+            if (!title || !text) { alert('请填写完整信息'); return; }
+            
+            if (currentEditIndex >= 0) {
+                allNotes[currentEditIndex].title = title;
+                allNotes[currentEditIndex].text = text;
+                allNotes[currentEditIndex].time = new Date().toLocaleString();
+            } else {
+                allNotes.push({
+                    id: Date.now().toString(),
+                    title: title,
+                    text: text,
+                    time: new Date().toLocaleString()
+                });
+            }
+            
+            renderNotes(allNotes);
+            await saveToCloud(allNotes);
+            closeModal();
+        }
+
+        async function deleteNote(index) {
+            if (!confirm('确定要删除这条笔记吗？')) return;
+            allNotes.splice(index, 1);
+            renderNotes(allNotes);
+            await saveToCloud(allNotes);
+        }
+
+        // ========== 初始化 ==========
+        allNotes = [];
+        window.addEventListener('load', () => {
+            loadFromCloud().then(() => {
+                const container = document.getElementById('notes-list');
+                const cards = container.querySelectorAll('.note-card');
+                allNotes = Array.from(cards).map((_, i) => ({
+                    id: Date.now().toString() + i,
+                    title: cards[i]?.querySelector('.note-title')?.textContent || '',
+                    text: cards[i]?.querySelector('.note-text')?.textContent || '',
+                    time: cards[i]?.querySelector('.note-time')?.textContent?.substring(2) || ''
+                })).reverse();
+            });
+        });
     </script>
 </body>
 </html>
