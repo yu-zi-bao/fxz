@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择你的身份</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 60px 20px 30px; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); color: #333; }
+        .container { width: 92%; max-width: 500px; text-align: center; }
+        h1 { font-size: 30px; color: #e17055; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); margin-bottom: 10px; }
+        .subtitle { font-size: 15px; color: #7f8c8d; margin-bottom: 40px; }
+        .child-card { background: white; border-radius: 24px; padding: 35px 25px; margin-bottom: 20px; border: 3px solid #dfe6e9; cursor: pointer; transition: all 0.3s ease; display: block; text-decoration: none; color: #333; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); }
+        .child-card:hover { transform: translate(-3px, -3px); box-shadow: 8px 8px 0 rgba(255,107,107,0.2); border-color: #ff6b6b; }
+        .child-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
+        .child-icon { font-size: 70px; margin-bottom: 15px; }
+        .child-name { font-size: 26px; font-weight: bold; color: #e17055; margin-bottom: 5px; }
+        .child-age { font-size: 14px; color: #7f8c8d; }
+        .back-link { position: fixed; top: 20px; left: 20px; color: #e17055; text-decoration: none; font-weight: bold; background: white; padding: 10px 18px; border-radius: 20px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); transition: 0.2s; }
+        .back-link:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 rgba(255,107,107,0.2); }
+    </style>
+</head>
+<body>
+    <a href="./index.html" class="back-link">← 返回选择</a>
+    
+    <div class="container">
+        <h1>👧 你是谁呀？</h1>
+        <div class="subtitle">点击你自己的头像 👇</div>
+
+        <a href="./child.html?child=yiyi" class="child-card">
+            <div class="child-icon">👧🏻</div>
+            <div class="child-name">艺艺</div>
+            <div class="child-age">大姐姐</div>
+        </a>
+
+        <a href="./child.html?child=xinxin" class="child-card">
+            <div class="child-icon">👶🏻</div>
+            <div class="child-name">欣欣</div>
+            <div class="child-age">小妹妹</div>
+        </a>
+    </div>
+</body>
+</html>
