@@ -3,229 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学习打卡（小朋友端）</title>
+    <title>学习打卡</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { min-height: 100vh; font-family: 'Comic Sans MS', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; color: #333; }
+        body { min-height: 100vh; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 25px; position: relative; }
-        .back-link { position: absolute; top: 0; left: 0; color: #667eea; text-decoration: none; font-weight: bold; }
-        h1 { font-size: 24px; color: #667eea; }
-        .points-badge { display: inline-block; background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; padding: 8px 20px; border-radius: 25px; font-size: 18px; font-weight: bold; margin: 10px 0; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab { flex: 1; padding: 10px; text-align: center; background: white; border: 2px solid #dfe6e9; border-radius: 12px; cursor: pointer; font-size: 13px; white-space: nowrap; transition: 0.2s; }
-        .tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); border: 3px solid #dfe6e9; }
-        .card h3 { color: #667eea; margin-bottom: 15px; font-size: 16px; }
-        .task-item { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 10px; border: 2px solid #e9ecef; display: flex; align-items: center; justify-content: space-between; }
-        .task-info { flex: 1; }
-        .task-name { font-weight: bold; margin-bottom: 5px; }
-        .task-points { font-size: 12px; color: #FFA500; }
-        .check-btn { background: linear-gradient(135deg, #56ab2f, #a8e063); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
-        .check-btn:active { transform: translate(1px, 1px); }
-        .check-btn.done { background: #ccc; cursor: not-allowed; }
-        .prize-card { background: linear-gradient(135deg, #fff5e6, #ffe6cc); border-radius: 10px; padding: 15px; margin-bottom: 10px; border: 2px solid #ffd699; }
-        .prize-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
-        .prize-cost { color: #FF6B00; font-weight: bold; }
-        .redeem-btn { background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); margin-top: 8px; }
-        .redeem-btn:active { transform: translate(1px, 1px); }
-        .empty { text-align: center; color: #999; padding: 20px; }
-        #error { background: #ffe0e0; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: none; color: #d32f2f; }
-        #loading { text-align: center; padding: 20px; color: #667eea; }
+        .header { text-align: center; margin-bottom: 20px; padding-top: 20px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 22px; color: #e17055; }
+        .child-badge { background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; color: #e17055; font-size: 14px; }
+        .back-link { position: fixed; top: 20px; left: 20px; color: #e17055; text-decoration: none; font-weight: bold; background: white; padding: 10px 18px; border-radius: 20px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); z-index: 10; }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .tab { padding: 10px 16px; border-radius: 20px; border: 2px solid #dfe6e9; background: white; cursor: pointer; font-size: 14px; white-space: nowrap; transition: 0.3s; }
+        .tab.active { border-color: #e17055; background: #e17055; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 10px; border: 2px solid #f0f0f0; }
+        .card h3 { color: #e17055; margin-bottom: 8px; }
+        .card p { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .card .actions { display: flex; gap: 8px; margin-top: 10px; }
+        .card .actions button { flex: 1; padding: 10px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-check { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+        .btn-redeem { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .btn-disabled { background: #bdc3c7; cursor: not-allowed; }
+        
+        .points-display { text-align: center; padding: 20px; background: white; border-radius: 16px; margin-bottom: 15px; }
+        .points-display .number { font-size: 48px; color: #e17055; font-weight: bold; }
+        .points-display .label { font-size: 16px; color: #7f8c8d; }
+        
+        .empty { text-align: center; padding: 30px; color: #999; }
+        .error-msg { background: #ffebee; color: #e74c3c; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: none; font-size: 14px; }
+        .success-msg { background: #d4edda; color: #155724; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: none; font-size: 14px; }
     </style>
 </head>
 <body>
+    <a href="./child-select.html" class="back-link">← 换人</a>
+    
     <div class="container">
         <div class="header">
-            <a href="./" class="back-link">← 返回</a>
-            <h1>🎒 小朋友端</h1>
+            <h1 id="pageTitle">🎒 学习打卡</h1>
+            <div class="child-badge" id="childBadge">👧🏻 艺艺</div>
         </div>
-        <div id="error"></div>
-        <div id="loading">⏳ 加载中...</div>
-        <div id="content" style="display:none">
-            <div class="points-badge">⭐ ${currentPoints} 积分</div>
-            <div class="tabs">
-                <div class="tab active" onclick="showTab('hw')">📖 今日作业</div>
-                <div class="tab" onclick="showTab('tasks')">✅ 每日打卡</div>
-                <div class="tab" onclick="showTab('prizes')">🎁 奖品兑换</div>
-                <div class="tab" onclick="showTab('records')">📈 我的记录</div>
-            </div>
-
-            <!-- 今日作业 -->
-            <div id="tab-hw" class="tab-content">
-                <div class="card">
-                    <h3>📖 今日作业</h3>
-                    <div id="hwList"></div>
-                </div>
-            </div>
-
-            <!-- 每日打卡 -->
-            <div id="tab-tasks" class="tab-content" style="display:none">
-                <div class="card">
-                    <h3>✅ 打卡赚积分</h3>
-                    <div id="tasksList"></div>
-                </div>
-            </div>
-
-            <!-- 奖品兑换 -->
-            <div id="tab-prizes" class="tab-content" style="display:none">
-                <div class="card">
-                    <h3>🎁 奖品兑换</h3>
-                    <div id="prizesList"></div>
-                </div>
-            </div>
-
-            <!-- 我的记录 -->
-            <div id="tab-records" class="tab-content" style="display:none">
-                <div class="card">
-                    <h3>📈 打卡记录</h3>
-                    <div id="tasksLog"></div>
-                </div>
-            </div>
+        
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+        
+        <div class="points-display">
+            <div class="number" id="totalPoints">0</div>
+            <div class="label">我的积分 💰</div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('homework')">📚 今日作业</div>
+            <div class="tab" onclick="switchTab('tasks')">✅ 打卡任务</div>
+            <div class="tab" onclick="switchTab('prizes')">🎁 兑换奖品</div>
+            <div class="tab" onclick="switchTab('records')">📈 我的记录</div>
+        </div>
+        
+        <div class="tab-content active" id="tab-homework">
+            <div id="homeworkList"></div>
+        </div>
+        
+        <div class="tab-content" id="tab-tasks">
+            <div id="tasksList"></div>
+        </div>
+        
+        <div class="tab-content" id="tab-prizes">
+            <div id="prizesList"></div>
+        </div>
+        
+        <div class="tab-content" id="tab-records">
+            <div id="recordsList"></div>
         </div>
     </div>
-    <script>
-        const API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json?ref=master';
-        const TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
-        let currentSha = '';
-        let data = { homework: [], tasks: [], prizes: [], tasksLog: [], pointsLog: [] };
-        let currentPoints = 0;
 
-        function b64toText(b64) {
+    <script>
+        const GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json';
+        const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentChild = urlParams.get('child') || 'yiyi';
+        
+        let fileSHA = '';
+        let data = {
+            yiyi: { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [] },
+            xinxin: { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [] }
+        };
+        
+        function base64Decode(b64) {
             const binary = atob(b64);
             const bytes = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
             return new TextDecoder('utf-8').decode(bytes);
         }
-        function textToB64(text) {
-            const bytes = new TextEncoder('utf-8').encode(text);
+        function textToBase64(text) {
+            const bytes = new TextEncoder().encode(text);
             return btoa(String.fromCharCode(...bytes));
         }
-
-        async function loadData() {
-            try {
-                const res = await fetch(API, { headers: { 'Authorization': 'Bearer ' + TOKEN } });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const json = await res.json();
-                currentSha = json.sha;
-                data = JSON.parse(b64toText(json.content));
-                if (!data.homework) data.homework = [];
-                if (!data.tasks) data.tasks = [];
-                if (!data.prizes) data.prizes = [];
-                if (!data.tasksLog) data.tasksLog = [];
-                if (!data.pointsLog) data.pointsLog = [];
-                currentPoints = data.tasksLog.reduce((sum, t) => sum + (t.points || 0), 0) - data.pointsLog.reduce((sum, p) => sum + (p.cost || 0), 0);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                renderAll();
-            } catch(e) { showError('加载失败：' + e.message); }
+        
+        function initApp() {
+            const childNames = { yiyi: '👧🏻 艺艺', xinxin: '👶🏻 欣欣' };
+            document.getElementById('childBadge').textContent = childNames[currentChild] || currentChild;
+            loadFromCloud();
         }
-
-        async function saveData() {
-            const b64 = textToB64(JSON.stringify(data, null, 2));
-            const body = JSON.stringify({ content: b64, message: '小朋友打卡', branch: 'master', sha: currentSha });
+        
+        async function loadFromCloud() {
             try {
-                const res = await fetch('https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json', {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' },
-                    body: body
+                const res = await fetch(GITEE_API + '?ref=master', {
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN }
                 });
-                if (!res.ok) {
-                    const err = await res.text();
-                    throw new Error('保存失败 ' + res.status);
-                }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const result = await res.json();
-                currentSha = result.content.sha;
+                fileSHA = result.sha;
+                const decoded = base64Decode(result.content);
+                const parsed = JSON.parse(decoded);
+                data.yiyi = { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [], ...parsed.yiyi };
+                data.xinxin = { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [], ...parsed.xinxin };
                 renderAll();
-            } catch(e) { showError('保存失败：' + e.message); }
+            } catch(e) {
+                showError('加载失败：' + e.message);
+            }
         }
-
-        function showTab(name) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.getElementById('tab-' + name).style.display = 'block';
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+        
+        async function saveToCloud() {
+            if (!fileSHA) return;
+            try {
+                const jsonStr = JSON.stringify(data, null, 2);
+                const b64 = textToBase64(jsonStr);
+                const res = await fetch(GITEE_API, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: b64, message: '更新学习数据', branch: 'master', sha: fileSHA })
+                });
+                if (!res.ok) throw new Error('保存失败 ' + res.status);
+                const result = await res.json();
+                fileSHA = result.content.sha;
+                renderAll();
+            } catch(e) {
+                showError('保存失败：' + e.message);
+            }
         }
-
-        function checkTask(taskId, taskName, points) {
-            const today = new Date().toDateString();
-            const alreadyDone = data.tasksLog.find(t => t.taskId === taskId && new Date(t.time).toDateString() === today);
-            if (alreadyDone) { showError('今天已经打卡过了！'); return; }
-            data.tasksLog.unshift({ taskId, taskName, points, time: new Date().toLocaleString() });
-            currentPoints += points;
-            saveData();
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                const tabs = ['homework', 'tasks', 'prizes', 'records'];
+                t.classList.toggle('active', tabs[i] === tabName);
+            });
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
         }
-
-        function redeemPrize(prizeId, prizeName, cost) {
-            if (currentPoints < cost) { showError('积分不够哦！'); return; }
-            if (!confirm('确定要兑换 "' + prizeName + '" 吗？')) return;
-            data.pointsLog.unshift({ prizeId, prizeName, cost, time: new Date().toLocaleString() });
-            currentPoints -= cost;
-            saveData();
-        }
-
-        function renderAll() {
-            document.querySelector('.points-badge').textContent = '⭐ ' + currentPoints + ' 积分';
-
-            document.getElementById('hwList').innerHTML = data.homework.length === 0 ?
-                '<div class="empty">📭 暂无作业</div>' :
-                data.homework.slice(0, 5).map(h => `
-                    <div class="task-item">
-                        <div class="task-info">
-                            <div class="task-name">${h.title}</div>
-                            <div class="task-points">${h.content}</div>
-                        </div>
-                    </div>
-                `).join('');
-
-            document.getElementById('tasksList').innerHTML = data.tasks.length === 0 ?
-                '<div class="empty">暂无打卡任务</div>' :
-                data.tasks.map(t => {
-                    const today = new Date().toDateString();
-                    const done = data.tasksLog.find(l => l.taskId === t.id && new Date(l.time).toDateString() === today);
-                    return `
-                        <div class="task-item">
-                            <div class="task-info">
-                                <div class="task-name">${t.name}</div>
-                                <div class="task-points">+${t.points} 积分</div>
-                            </div>
-                            <button class="check-btn ${done ? 'done' : ''}" onclick="checkTask('${t.id}','${t.name}',${t.points})" ${done ? 'disabled' : ''}>
-                                ${done ? '✅ 已完成' : '✅ 打卡'}
-                            </button>
-                        </div>
-                    `;
-                }).join('');
-
-            document.getElementById('prizesList').innerHTML = data.prizes.length === 0 ?
-                '<div class="empty">暂无奖品</div>' :
-                data.prizes.map(p => `
-                    <div class="prize-card">
-                        <div class="prize-name">🎁 ${p.name}</div>
-                        <div class="prize-cost">需要 ${p.cost} 积分</div>
-                        <button class="redeem-btn" onclick="redeemPrize('${p.id}','${p.name}',${p.cost})">兑换</button>
-                    </div>
-                `).join('');
-
-            document.getElementById('tasksLog').innerHTML = data.tasksLog.length === 0 ?
-                '<div class="empty">暂无打卡记录</div>' :
-                data.tasksLog.map(t => `
-                    <div class="task-item">
-                        <div class="task-info">
-                            <div class="task-name">✅ ${t.taskName}</div>
-                            <div class="task-points">+${t.points} 积分 | ${t.time}</div>
-                        </div>
-                    </div>
-                `).join('');
-        }
-
+        
         function showError(msg) {
-            document.getElementById('error').textContent = '⚠️ ' + msg;
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
+            const el = document.getElementById('errorMsg');
+            el.textContent = '⚠️ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
         }
-
-        loadData();
+        function showSuccess(msg) {
+            const el = document.getElementById('successMsg');
+            el.textContent = '✅ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+        
+        function getCD() { return data[currentChild]; }
+        
+        function getTotalPoints() {
+            const cd = getCD();
+            return (cd.tasksLog?.reduce((s, r) => s + r.points, 0) || 0) + 
+                   (cd.pointsLog?.reduce((s, r) => s + r.points, 0) || 0);
+        }
+        
+        function renderAll() {
+            document.getElementById('totalPoints').textContent = getTotalPoints();
+            renderHomework();
+            renderTasks();
+            renderPrizes();
+            renderRecords();
+        }
+        
+        function renderHomework() {
+            const cd = getCD();
+            const container = document.getElementById('homeworkList');
+            if (!cd.homework || cd.homework.length === 0) {
+                container.innerHTML = '<div class="empty">今天没有作业哦 🎉</div>';
+                return;
+            }
+            container.innerHTML = [...cd.homework].reverse().map(h => `
+                <div class="card">
+                    <h3>${escapeHtml(h.title)}</h3>
+                    <p>📅 ${h.date}</p>
+                    <p>${escapeHtml(h.content)}</p>
+                </div>
+            `).join('');
+        }
+        
+        function renderTasks() {
+            const cd = getCD();
+            const container = document.getElementById('tasksList');
+            if (!cd.tasksConfig || cd.tasksConfig.length === 0) {
+                container.innerHTML = '<div class="empty">暂无打卡任务</div>';
+                return;
+            }
+            container.innerHTML = cd.tasksConfig.map((t, i) => {
+                const today = new Date().toISOString().split('T')[0];
+                const alreadyDone = cd.tasksLog?.some(r => r.taskId === t.id && r.time.startsWith(today));
+                return `
+                    <div class="card">
+                        <h3>${escapeHtml(t.name)}</h3>
+                        <p>💰 完成可获得 ${t.points} 积分</p>
+                        <div class="actions">
+                            ${alreadyDone ? 
+                                '<button class="btn-disabled" disabled>✅ 已完成</button>' :
+                                `<button class="btn-check" onclick="doCheckIn(${i})">⭐ 打卡</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderPrizes() {
+            const cd = getCD();
+            const container = document.getElementById('prizesList');
+            const totalPoints = getTotalPoints();
+            if (!cd.prizes || cd.prizes.length === 0) {
+                container.innerHTML = '<div class="empty">暂无奖品</div>';
+                return;
+            }
+            container.innerHTML = cd.prizes.map((p, i) => {
+                const canRedeem = totalPoints >= p.cost;
+                return `
+                    <div class="card">
+                        <h3>${escapeHtml(p.name)}</h3>
+                        <p>💰 需要 ${p.cost} 积分</p>
+                        <p>当前积分：${totalPoints}</p>
+                        <div class="actions">
+                            ${canRedeem ? 
+                                `<button class="btn-redeem" onclick="redeemPrize(${i})">🎁 兑换</button>` :
+                                `<button class="btn-disabled" disabled>积分不足</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderRecords() {
+            const cd = getCD();
+            const container = document.getElementById('recordsList');
+            const allRecords = [...(cd.tasksLog || [])].map(r => ({...r, type: 'task'}));
+            if (allRecords.length === 0) {
+                container.innerHTML = '<div class="empty">暂无记录</div>';
+                return;
+            }
+            container.innerHTML = [...allRecords].reverse().map(r => `
+                <div class="card">
+                    <h3>${escapeHtml(r.taskName || r.name || '打卡')}</h3>
+                    <p>💰 +${r.points}积分</p>
+                    <p>🕐 ${r.time}</p>
+                </div>
+            `).join('');
+        }
+        
+        async function doCheckIn(index) {
+            const cd = getCD();
+            const task = cd.tasksConfig[index];
+            if (!task) return;
+            if (!confirm(`确定完成"${task.name}"吗？`)) return;
+            
+            cd.tasksLog.push({
+                taskId: task.id,
+                taskName: task.name,
+                points: task.points,
+                time: new Date().toLocaleString()
+            });
+            await saveToCloud();
+            showSuccess('打卡成功！+ ' + task.points + '积分');
+        }
+        
+        async function redeemPrize(index) {
+            const cd = getCD();
+            const prize = cd.prizes[index];
+            if (!prize) return;
+            if (!confirm(`确定用 ${prize.cost} 积分兑换"${prize.name}"吗？`)) return;
+            
+            cd.pointsLog.push({
+                id: Date.now().toString(),
+                type: 'redeem',
+                reason: '兑换：' + prize.name,
+                points: -prize.cost,
+                time: new Date().toLocaleString()
+            });
+            await saveToCloud();
+            showSuccess('兑换成功！请找家长兑现 🎁');
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        window.addEventListener('load', initApp);
     </script>
 </body>
 </html>
