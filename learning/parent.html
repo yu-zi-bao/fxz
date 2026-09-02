@@ -11,7 +11,6 @@
         .header { text-align: center; margin-bottom: 20px; position: relative; }
         .back-link { position: absolute; top: 5px; left: 0; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
         h1 { font-size: 24px; color: #667eea; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); }
-        /* 密码登录 */
         #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; }
         .login-box { background: white; border-radius: 24px; padding: 40px 30px; width: 90%; max-width: 360px; box-shadow: 8px 8px 0 rgba(0,0,0,0.1); border: 3px solid #dfe6e9; text-align: center; }
         .login-box h2 { color: #667eea; margin-bottom: 20px; }
@@ -19,7 +18,6 @@
         .login-box input:focus { border-color: #667eea; outline: none; }
         .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
         .login-error { color: #ff6b6b; font-size: 13px; margin-top: 10px; display: none; }
-        /* 标签页 */
         .tabs { display: flex; gap: 8px; margin-bottom: 18px; background: rgba(255,255,255,0.4); padding: 5px; border-radius: 16px; overflow-x: auto; }
         .tab { flex: 1; padding: 10px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 13px; color: #636e72; white-space: nowrap; }
         .tab.active { background: white; color: #667eea; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
@@ -32,12 +30,17 @@
         .input-group input, .input-group textarea { width: 100%; padding: 10px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 14px; }
         .input-group textarea { height: 70px; resize: vertical; }
         .primary-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
-        .list-item { background: #f8f9fa; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 2px solid #dfe6e9; }
-        .log-item { background: #f0f0f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; border-left: 4px solid #667eea; }
+        .log-item { background: #f0f0f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; border-left: 4px solid #667eea; }
         .log-item.earn { border-left-color: #00b894; }
         .log-item.redeem { border-left-color: #fdcb6e; }
         .log-item.admin { border-left-color: #e17055; }
-        .points-display { text-align: center; padding: 15px; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border-radius: 16px; margin-bottom: 15px; font-size: 20px; font-weight: bold; color: #d63031; }
+        .points-display { text-align: center; padding: 15px; background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border-radius: 16px; margin-bottom: 15px; font-size: 20px; font-weight: bold; color: #d63031; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+        .item-actions { margin-top: 8px; text-align: right; }
+        .item-actions button { padding: 5px 12px; border: 2px solid #dfe6e9; background: white; border-radius: 10px; font-size: 12px; cursor: pointer; margin-left: 5px; }
+        .item-actions button.edit { border-color: #667eea; color: #667eea; }
+        .item-actions button.del { border-color: #ff6b6b; color: #ff6b6b; }
+        .item-actions button.save { border-color: #00b894; color: white; background: #00b894; }
+        .edit-input { width: 70px; padding: 3px 6px; border: 2px solid #667eea; border-radius: 8px; font-size: 14px; text-align: center; }
         #loading { text-align: center; padding: 30px; color: #667eea; }
         #error { display: none; background: #ffeaa7; padding: 12px 18px; border-radius: 12px; margin-bottom: 15px; color: #d63031; }
         .empty-state { text-align: center; padding: 30px; color: #95a5a6; }
@@ -49,7 +52,6 @@
             <a href="./" class="back-link">← 返回</a>
             <h1>👨‍👩‍👧 家长端</h1>
         </div>
-        <!-- 密码登录 -->
         <div id="loginScreen">
             <div class="login-box">
                 <h2>🔒 家长登录</h2>
@@ -59,7 +61,6 @@
                 <div class="login-error" id="loginError">密码错误，请重试</div>
             </div>
         </div>
-        <!-- 主内容 -->
         <div id="mainContent" style="display:none;">
             <div id="error"></div>
             <div id="loading">🔄 正在加载数据...</div>
@@ -71,7 +72,6 @@
                     <div class="tab" onclick="switchTab('prizes')">🎁 奖品</div>
                     <div class="tab" onclick="switchTab('records')">📊 记录</div>
                 </div>
-                <!-- 作业 -->
                 <div id="homework" class="section active">
                     <div class="card">
                         <div class="card-title">📝 发布新作业</div>
@@ -82,7 +82,6 @@
                     </div>
                     <div id="homeworkList"></div>
                 </div>
-                <!-- 任务 -->
                 <div id="tasks" class="section">
                     <div class="card">
                         <div class="card-title">✅ 添加打卡任务</div>
@@ -92,7 +91,6 @@
                     </div>
                     <div id="tasksList"></div>
                 </div>
-                <!-- 奖品 -->
                 <div id="prizes" class="section">
                     <div class="card">
                         <div class="card-title">🎁 添加奖品</div>
@@ -102,11 +100,10 @@
                     </div>
                     <div id="prizesList"></div>
                 </div>
-                <!-- 记录 -->
                 <div id="records" class="section">
                     <div class="card">
                         <div class="card-title">📋 打卡记录管理</div>
-                        <p style="font-size:12px;color:#95a5a6;margin-bottom:10px;">删除打卡记录会同步减少对应积分</p>
+                        <p style="font-size:12px;color:#95a5a6;margin-bottom:10px;">可以修改小朋友获得的积分，也可以删除整条打卡记录</p>
                         <div id="checkinRecords"></div>
                     </div>
                     <div class="card">
@@ -128,14 +125,14 @@
             TOKEN: '8903f7dbff4a9eabb1d75ce37ba9ec4c',
             BRANCH: 'master'
         };
-        var state = { fileSHA: null, data: { homework: [], tasksConfig: [], pointsConfig: [], pointsLog: [], tasks: [] }, totalPoints: 0 };
+        var state = { fileSHA: null, data: { homework: [], tasksConfig: [], pointsConfig: [], pointsLog: [], tasks: [] } };
         function hashPwd(p) { var h=0; for(var i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h=h&h;} return Math.abs(h).toString(16); }
         window.doLogin = function() {
             var p = document.getElementById('loginPassword').value;
-            if(hashPwd(p) === hashPwd('123456') || hashPwd(p) === hashPwd('parent123')) {
+            if(hashPwd(p)===hashPwd('123456')||hashPwd(p)===hashPwd('parent123')){
                 sessionStorage.setItem('parentLoggedIn','true'); showMain();
             } else {
-                var e = document.getElementById('loginError'); e.style.display='block'; e.textContent='密码错误';
+                var e=document.getElementById('loginError'); e.style.display='block'; e.textContent='密码错误';
                 document.getElementById('loginPassword').value=''; document.getElementById('loginPassword').focus();
             }
         };
@@ -146,13 +143,13 @@
             loadData();
         }
         function b64dec(b) { var r=atob(b), u=new Uint8Array(r.length); for(var i=0;i<r.length;i++) u[i]=r.charCodeAt(i); return new TextDecoder('utf-8').decode(u); }
-        function b64enc(t) { return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(t))); }
+        function b64enc(t) { return btoa(String.fromCharCode.apply(null,new TextEncoder().encode(t))); }
         async function loadData() {
             try {
-                var res = await fetch(CONFIG.API+'?ref='+CONFIG.BRANCH, {headers:{'Authorization':'Bearer '+CONFIG.TOKEN}});
+                var res=await fetch(CONFIG.API+'?ref='+CONFIG.BRANCH,{headers:{'Authorization':'Bearer '+CONFIG.TOKEN}});
                 if(!res.ok) throw new Error('HTTP '+res.status);
-                var j = await res.json(); state.fileSHA = j.sha;
-                state.data = JSON.parse(b64dec(j.content));
+                var j=await res.json(); state.fileSHA=j.sha;
+                state.data=JSON.parse(b64dec(j.content));
                 if(!state.data.homework) state.data.homework=[];
                 if(!state.data.tasksConfig) state.data.tasksConfig=[];
                 if(!state.data.pointsConfig) state.data.pointsConfig=[];
@@ -165,78 +162,93 @@
         }
         async function saveData() {
             try {
-                var body = JSON.stringify({content:b64enc(JSON.stringify(state.data,null,2)),message:'家长端更新',branch:CONFIG.BRANCH,sha:state.fileSHA});
-                var res = await fetch(CONFIG.API, {method:'PUT',headers:{'Authorization':'Bearer '+CONFIG.TOKEN,'Content-Type':'application/json'},body:body});
+                var body=JSON.stringify({content:b64enc(JSON.stringify(state.data,null,2)),message:'家长端更新',branch:CONFIG.BRANCH,sha:state.fileSHA});
+                var res=await fetch(CONFIG.API,{method:'PUT',headers:{'Authorization':'Bearer '+CONFIG.TOKEN,'Content-Type':'application/json'},body:body});
                 if(!res.ok) throw new Error('保存失败 '+res.status);
-                var r = await res.json(); state.fileSHA = r.content.sha;
+                var r=await res.json(); state.fileSHA=r.content.sha;
                 calcPts(); renderAll();
             } catch(e) { showError('保存失败：'+e.message); }
         }
         function calcPts() {
-            state.totalPoints = state.data.pointsLog.reduce(function(s,l){return s+(l.points||0);},0);
-            document.getElementById('totalPoints').textContent = state.totalPoints;
+            state.totalPoints=state.data.pointsLog.reduce(function(s,l){return s+(l.points||0);},0);
+            document.getElementById('totalPoints').textContent=state.totalPoints;
         }
-        window.switchTab = function(n) {
+        window.switchTab=function(n){
             document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
             document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
             document.querySelector('.tab[onclick*="'+n+'"]').classList.add('active');
             document.getElementById(n).classList.add('active');
         };
-        window.addHomework = function() {
+        window.addHomework=function(){
             var t=document.getElementById('hwTitle').value.trim(), c=document.getElementById('hwContent').value.trim(), d=document.getElementById('hwDate').value;
             if(!t||!c){alert('请填写完整');return;}
             state.data.homework.unshift({id:Date.now().toString(),title:t,content:c,date:d||new Date().toISOString().split('T')[0]});
             document.getElementById('hwTitle').value=''; document.getElementById('hwContent').value=''; saveData();
         };
-        window.addTask = function() {
+        window.addTask=function(){
             var n=document.getElementById('taskName').value.trim(), p=parseInt(document.getElementById('taskPoints').value)||10;
             if(!n){alert('请填写名称');return;}
             state.data.tasksConfig.push({id:Date.now().toString(),name:n,points:p});
             document.getElementById('taskName').value=''; saveData();
         };
-        window.addPrize = function() {
+        window.addPrize=function(){
             var n=document.getElementById('prizeName').value.trim(), c=parseInt(document.getElementById('prizeCost').value)||50;
             if(!n){alert('请填写名称');return;}
             state.data.pointsConfig.push({id:Date.now().toString(),name:n,cost:c});
             document.getElementById('prizeName').value=''; saveData();
         };
-        window.deleteCheckin = function(i) {
-            if(!confirm('删除打卡会减少对应积分，确定吗？')) return;
-            var t = state.data.tasks[i];
-            state.data.tasks.splice(i, 1);
-            state.data.pointsLog.unshift({type:'admin',name:'撤销打卡: '+t.taskName,points:-t.points,time:new Date().toLocaleString('zh-CN')});
+        // 修改打卡积分
+        window.startEditPoints=function(i){
+            var input=document.getElementById('editInput_'+i);
+            var btn=document.getElementById('editBtn_'+i);
+            if(input){
+                var newPts=parseInt(input.value);
+                if(isNaN(newPts)||newPts<0){alert('请输入有效数字');return;}
+                var oldPts=state.data.tasks[i].points;
+                state.data.tasks[i].points=newPts;
+                state.data.pointsLog.unshift({type:'admin',name:'调整积分: '+state.data.tasks[i].taskName+' '+oldPts+'→'+newPts+'分',points:newPts-oldPts,time:new Date().toLocaleString('zh-CN')});
+                saveData();
+            }
+        };
+        window.deleteCheckin=function(i){
+            if(!confirm('删除此打卡会减少对应积分，确定吗？')) return;
+            var t=state.data.tasks[i];
+            state.data.tasks.splice(i,1);
+            state.data.pointsLog.unshift({type:'admin',name:'删除打卡: '+t.taskName,points:-t.points,time:new Date().toLocaleString('zh-CN')});
             saveData();
         };
-        window.deleteItem = function(type,i) {
+        window.deleteItem=function(type,i){
             if(!confirm('确定删除吗？')) return;
             state.data[type].splice(i,1); saveData();
         };
-        function esc(t) { if(!t) return ''; var d=document.createElement('div'); d.textContent=String(t); return d.innerHTML; }
-        function renderAll() {
-            document.getElementById('homeworkList').innerHTML = state.data.homework.length ?
-                state.data.homework.map(function(h,i){return '<div class="card"><div class="card-title">'+esc(h.title)+'</div><div style="font-size:13px;color:#555;">'+esc(h.content)+'</div><div style="font-size:12px;color:#999;margin-top:5px;">📅'+h.date+'</div><div style="text-align:right;margin-top:8px;"><button onclick="deleteItem(\'homework\','+i+')" style="padding:5px 12px;border:2px solid #dfe6e9;background:white;border-radius:10px;cursor:pointer;">🗑️ 删除</button></div></div>';}).join('') :
-                '<div class="empty-state">暂无作业</div>';
-            document.getElementById('tasksList').innerHTML = state.data.tasksConfig.length ?
-                state.data.tasksConfig.map(function(t,i){return '<div class="card"><div class="card-title">'+esc(t.name)+'</div><div style="font-size:12px;color:#fdcb6e;">⭐ '+t.points+'积分</div><div style="text-align:right;margin-top:8px;"><button onclick="deleteItem(\'tasksConfig\','+i+')" style="padding:5px 12px;border:2px solid #dfe6e9;background:white;border-radius:10px;cursor:pointer;">🗑️ 删除</button></div></div>';}).join('') :
-                '<div class="empty-state">暂无任务</div>';
-            document.getElementById('prizesList').innerHTML = state.data.pointsConfig.length ?
-                state.data.pointsConfig.map(function(p,i){return '<div class="card"><div class="card-title">'+esc(p.name)+'</div><div style="font-size:12px;color:#d63031;">🎯 '+p.cost+'积分</div><div style="text-align:right;margin-top:8px;"><button onclick="deleteItem(\'pointsConfig\','+i+')" style="padding:5px 12px;border:2px solid #dfe6e9;background:white;border-radius:10px;cursor:pointer;">🗑️ 删除</button></div></div>';}).join('') :
-                '<div class="empty-state">暂无奖品</div>';
-            document.getElementById('checkinRecords').innerHTML = state.data.tasks.length ?
-                state.data.tasks.map(function(t,i){return '<div class="log-item earn"><div style="font-size:14px;">✅ '+esc(t.taskName)+'</div><div style="font-size:11px;color:#999;">'+t.date+' | +'+t.points+'积分 | '+t.time+'</div><div style="text-align:right;margin-top:5px;"><button onclick="deleteCheckin('+i+')" style="padding:4px 10px;border:2px solid #ff6b6b;background:white;border-radius:8px;cursor:pointer;color:#ff6b6b;font-size:12px;">🗑️ 撤销打卡</button></div></div>';}).join('') :
-                '<div class="empty-state">暂无打卡记录</div>';
-            var redeemLogs = state.data.pointsLog.filter(function(l){return l.type==='redeem';});
-            document.getElementById('redeemRecords').innerHTML = redeemLogs.length ?
-                redeemLogs.map(function(l){return '<div class="log-item redeem"><div style="font-size:14px;">🎁 '+esc(l.name)+'</div><div style="font-size:11px;color:#999;">-'+l.points+'积分 | '+l.time+'</div></div>';}).join('') :
-                '<div class="empty-state">暂无兑换记录</div>';
-            document.getElementById('pointsLog').innerHTML = state.data.pointsLog.length ?
-                state.data.pointsLog.map(function(l){
-                    var cls=l.type==='earn'?'earn':(l.type==='redeem'?'redeem':'admin');
-                    var icon=l.type==='earn'?'🌟':(l.type==='redeem'?'🎁':'📝');
-                    return '<div class="log-item '+cls+'"><div style="font-size:14px;">'+icon+' '+esc(l.name)+'</div><div style="font-size:11px;color:#999;">'+(l.points>0?'+':'')+l.points+'积分 | '+l.time+'</div></div>';
-                }).join('') : '<div class="empty-state">暂无记录</div>';
+        function esc(t){if(!t)return '';var d=document.createElement('div');d.textContent=String(t);return d.innerHTML;}
+        function renderAll(){
+            document.getElementById('homeworkList').innerHTML=state.data.homework.length?
+                state.data.homework.map(function(h,i){return '<div class="card"><div class="card-title">'+esc(h.title)+'</div><div style="font-size:13px;color:#555;">'+esc(h.content)+'</div><div style="font-size:12px;color:#999;margin-top:5px;">📅'+h.date+'</div><div style="text-align:right;margin-top:8px;"><button onclick="deleteItem(\'homework\','+i+')" style="padding:5px 12px;border:2px solid #ff6b6b;background:white;border-radius:10px;cursor:pointer;color:#ff6b6b;font-size:12px;">🗑️ 删除</button></div></div>';}).join(''):'<div class="empty-state">暂无作业</div>';
+            document.getElementById('tasksList').innerHTML=state.data.tasksConfig.length?
+                state.data.tasksConfig.map(function(t,i){return '<div class="card"><div class="card-title">'+esc(t.name)+'</div><div style="font-size:12px;color:#fdcb6e;">⭐ 奖励 '+t.points+' 积分</div><div style="text-align:right;margin-top:8px;"><button onclick="deleteItem(\'tasksConfig\','+i+')" style="padding:5px 12px;border:2px solid #ff6b6b;background:white;border-radius:10px;cursor:pointer;color:#ff6b6b;font-size:12px;">🗑️ 删除</button></div></div>';}).join(''):'<div class="empty-state">暂无任务</div>';
+            document.getElementById('prizesList').innerHTML=state.data.pointsConfig.length?
+                state.data.pointsConfig.map(function(p,i){return '<div class="card"><div class="card-title">'+esc(p.name)+'</div><div style="font-size:12px;color:#d63031;">🎯 需要 '+p.cost+' 积分</div><div style="text-align:right;margin-top:8px;"><button onclick="deleteItem(\'pointsConfig\','+i+')" style="padding:5px 12px;border:2px solid #ff6b6b;background:white;border-radius:10px;cursor:pointer;color:#ff6b6b;font-size:12px;">🗑️ 删除</button></div></div>';}).join(''):'<div class="empty-state">暂无奖品</div>';
+            document.getElementById('checkinRecords').innerHTML=state.data.tasks.length?
+                state.data.tasks.map(function(t,i){return '<div class="log-item earn"><div style="font-size:14px;font-weight:bold;">✅ '+esc(t.taskName)+'</div><div style="font-size:12px;color:#00b894;margin-top:3px;">+<span id="pts_'+i+'">'+t.points+'</span> 积分</div><div style="font-size:11px;color:#95a5a6;">'+(t.date||'')+' | '+t.time+'</div><div class="item-actions"><input class="edit-input" id="editInput_'+i+'" type="number" value="'+t.points+'" min="0" style="display:none;"><button class="save" id="editBtn_'+i+'" onclick="startEditPoints('+i+')" style="display:none;">✅ 保存</button> <button class="edit" id="editToggle_'+i+'" onclick="window.showEditInput('+i+')">✏️ 修改积分</button> <button class="del" onclick="deleteCheckin('+i+')">🗑️ 删除</button></div></div>';}).join(''):'<div class="empty-state">暂无打卡记录</div>';
+            document.querySelectorAll('[id^="editToggle_"]').forEach(function(btn){
+                var idx=btn.id.split('_')[1];
+                btn.onclick=function(){
+                    var input=document.getElementById('editInput_'+idx);
+                    var saveBtn=document.getElementById('editBtn_'+idx);
+                    if(input.style.display==='none'){
+                        input.style.display='inline-block'; saveBtn.style.display='inline-block'; btn.style.display='none';
+                        input.focus(); input.select();
+                    }
+                };
+            });
+            var redeemLogs=state.data.pointsLog.filter(function(l){return l.type==='redeem';});
+            document.getElementById('redeemRecords').innerHTML=redeemLogs.length?
+                redeemLogs.map(function(l){return '<div class="log-item redeem"><div class="log-text">🎁 '+esc(l.name)+'</div><div class="log-time">-'+l.points+'积分 | '+l.time+'</div></div>';}).join(''):'<div class="empty-state">暂无兑换记录</div>';
+            document.getElementById('pointsLog').innerHTML=state.data.pointsLog.length?
+                state.data.pointsLog.map(function(l){var cls=l.type==='earn'?'earn':(l.type==='redeem'?'redeem':'admin');var icon=l.type==='earn'?'🌟':(l.type==='redeem'?'🎁':'📝');return '<div class="log-item '+cls+'"><div class="log-text">'+icon+' '+esc(l.name)+'</div><div class="log-time">'+(l.points>0?'+':'')+l.points+'积分 | '+l.time+'</div></div>';}).join(''):'<div class="empty-state">暂无记录</div>';
         }
-        function showError(m) { var e=document.getElementById('error'); e.textContent='⚠️ '+m; e.style.display='block'; document.getElementById('loading').style.display='none'; }
+        function showError(m){var e=document.getElementById('error');e.textContent='⚠️ '+m;e.style.display='block';document.getElementById('loading').style.display='none';}
         checkLogin();
     })();
     </script>
