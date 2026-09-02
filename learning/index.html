@@ -6,7 +6,7 @@
     <title>学习管理 - 选择身份</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 60px 20px 30px; font-family: 'Comic Sans MS', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 60px 20px 30px; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
         .container { width: 92%; max-width: 500px; text-align: center; }
         h1 { font-size: 30px; color: #667eea; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); margin-bottom: 10px; }
         .subtitle { font-size: 15px; color: #7f8c8d; margin-bottom: 40px; }
@@ -22,18 +22,32 @@
 </head>
 <body>
     <a href="../" class="back-link">← 返回首页</a>
+    
     <div class="container">
         <h1>🎓 学习管理</h1>
         <div class="subtitle">请选择你的身份 👇</div>
+
         <a href="./parent.html" class="role-card">
             <div class="role-icon">👨‍👩‍👧</div>
             <div class="role-title">家长端</div>
-            <div class="role-desc">📚 发布每日作业<br>✅ 配置打卡任务与积分<br>🎁 管理奖品兑换列表<br>📊 查看孩子学习记录</div>
+            <div class="role-desc">
+                🔐 需要密码登录<br>
+                📚 发布每日作业<br>
+                ✅ 配置打卡任务与积分<br>
+                🎁 管理奖品兑换列表<br>
+                💰 手动增减小朋友积分
+            </div>
         </a>
-        <a href="./child.html" class="role-card">
+
+        <a href="./child-select.html" class="role-card">
             <div class="role-icon">🎒</div>
             <div class="role-title">小朋友端</div>
-            <div class="role-desc">📖 查看今日作业<br>⭐ 完成打卡赚积分<br>🎁 用积分兑换心仪奖品<br>📈 查看我的成长记录</div>
+            <div class="role-desc">
+                👧 请选择你的身份<br>
+                📖 查看今日作业<br>
+                ⭐ 完成打卡赚积分<br>
+                🎁 用积分兑换心仪奖品
+            </div>
         </a>
     </div>
 </body>
