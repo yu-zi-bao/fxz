@@ -6,259 +6,459 @@
     <title>学习管理（家长端）</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { min-height: 100vh; font-family: 'Comic Sans MS', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; color: #333; }
+        body { min-height: 100vh; font-family: 'Comic Sans MS', 'PingFang SC', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 25px; position: relative; }
-        .back-link { position: absolute; top: 0; left: 0; color: #667eea; text-decoration: none; font-weight: bold; }
-        h1 { font-size: 24px; color: #667eea; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab { flex: 1; padding: 10px; text-align: center; background: white; border: 2px solid #dfe6e9; border-radius: 12px; cursor: pointer; font-size: 13px; white-space: nowrap; transition: 0.2s; }
-        .tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); border: 3px solid #dfe6e9; }
-        .card h3 { color: #667eea; margin-bottom: 15px; font-size: 16px; }
-        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 14px; }
-        textarea { height: 80px; resize: vertical; }
-        .btn { padding: 10px 20px; border: none; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); }
-        .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
-        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .btn-success { background: linear-gradient(135deg, #56ab2f, #a8e063); color: white; }
-        .item { background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 2px solid #e9ecef; }
-        .item-title { font-weight: bold; margin-bottom: 5px; }
-        .item-meta { font-size: 12px; color: #666; }
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .delete-btn { background: #ff6b6b; color: white; }
-        #error { background: #ffe0e0; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: none; color: #d32f2f; }
-        #loading { text-align: center; padding: 20px; color: #667eea; }
+        .header { text-align: center; margin-bottom: 20px; padding-top: 20px; }
+        .header h1 { font-size: 26px; color: #667eea; text-shadow: 2px 2px 0 rgba(255,255,255,0.5); }
+        .back-link { position: fixed; top: 20px; left: 20px; color: #667eea; text-decoration: none; font-weight: bold; background: white; padding: 10px 18px; border-radius: 20px; box-shadow: 3px 3px 0 rgba(0,0,0,0.1); z-index: 10; }
+        
+        /* 登录遮罩 */
+        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .login-box { background: white; border-radius: 24px; padding: 40px 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-width: 320px; width: 90%; }
+        .login-box h2 { color: #667eea; margin-bottom: 20px; font-size: 22px; }
+        .login-box input { width: 100%; padding: 15px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 18px; text-align: center; margin-bottom: 15px; }
+        .login-box button { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .login-box button:active { transform: scale(0.98); }
+        .login-error { color: #e74c3c; margin-top: 10px; font-size: 14px; display: none; }
+        
+        /* 孩子选择器 */
+        .child-selector { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .child-btn { padding: 10px 20px; border-radius: 20px; border: 3px solid #dfe6e9; background: white; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        .child-btn.active { border-color: #667eea; background: #667eea; color: white; }
+        
+        /* 标签页 */
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .tab { padding: 10px 16px; border-radius: 20px; border: 2px solid #dfe6e9; background: white; cursor: pointer; font-size: 14px; white-space: nowrap; transition: 0.3s; }
+        .tab.active { border-color: #667eea; background: #667eea; color: white; }
+        
+        /* 内容区 */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* 表单 */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 15px; }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: 0.3s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-danger { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .btn-success { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+        
+        /* 列表项 */
+        .item-card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 10px; border: 2px solid #f0f0f0; }
+        .item-card h3 { color: #667eea; margin-bottom: 5px; }
+        .item-card p { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .item-card .actions { display: flex; gap: 8px; margin-top: 10px; }
+        .item-card .actions button { flex: 1; padding: 8px; border: none; border-radius: 10px; font-size: 13px; cursor: pointer; }
+        
+        /* 积分调整 */
+        .points-adjust { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+        .points-adjust input { flex: 1; padding: 10px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 16px; text-align: center; }
+        .points-adjust button { padding: 10px 15px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; color: white; }
+        .add-points { background: #2ecc71; }
+        .subtract-points { background: #e74c3c; }
+        
+        .empty { text-align: center; padding: 30px; color: #999; }
+        .error-msg { background: #ffebee; color: #e74c3c; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: none; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <a href="./" class="back-link">← 返回</a>
-            <h1>👨‍👩‍👧 家长端</h1>
+    <!-- 登录遮罩 -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>🔐 家长端登录</h2>
+            <input type="password" id="passwordInput" placeholder="请输入密码" onkeypress="if(event.key==='Enter')doLogin()">
+            <button onclick="doLogin()">进入家长端</button>
+            <div class="login-error" id="loginError">密码错误，请重试！</div>
+            <p style="margin-top:15px;font-size:12px;color:#999;">默认密码：123456</p>
         </div>
-        <div id="error"></div>
-        <div id="loading">⏳ 加载中...</div>
-        <div id="content" style="display:none">
-            <div class="tabs">
-                <div class="tab active" onclick="showTab('homework')">📚 发布作业</div>
-                <div class="tab" onclick="showTab('tasks')">✅ 打卡任务</div>
-                <div class="tab" onclick="showTab('prizes')">🎁 奖品管理</div>
-                <div class="tab" onclick="showTab('records')">📊 学习记录</div>
-            </div>
+    </div>
 
-            <!-- 作业管理 -->
-            <div id="tab-homework" class="tab-content">
-                <div class="card">
-                    <h3>📚 发布新作业</h3>
-                    <input type="text" id="hwTitle" placeholder="作业科目">
-                    <textarea id="hwContent" placeholder="作业内容"></textarea>
+    <a href="./index.html" class="back-link">← 返回</a>
+    
+    <div class="container" id="mainContent" style="display:none;">
+        <div class="header">
+            <h1>👨‍👩‍👧 家长管理端</h1>
+        </div>
+        
+        <!-- 孩子选择 -->
+        <div class="child-selector">
+            <button class="child-btn active" onclick="switchChild('yiyi')">👧🏻 艺艺</button>
+            <button class="child-btn" onclick="switchChild('xinxin')">👶🏻 欣欣</button>
+        </div>
+        
+        <div class="error-msg" id="errorMsg"></div>
+        
+        <!-- 标签页 -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('tasks')">✅ 打卡任务</div>
+            <div class="tab" onclick="switchTab('homework')">📚 每日作业</div>
+            <div class="tab" onclick="switchTab('prizes')">🎁 奖品管理</div>
+            <div class="tab" onclick="switchTab('records')">📊 打卡记录</div>
+            <div class="tab" onclick="switchTab('points')">💰 积分管理</div>
+        </div>
+        
+        <!-- 打卡任务 -->
+        <div class="tab-content active" id="tab-tasks">
+            <div class="item-card">
+                <h3>➕ 新增打卡任务</h3>
+                <div class="form-group">
+                    <input type="text" id="taskName" placeholder="任务名称，如：背单词">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="taskPoints" placeholder="完成任务获得的积分" value="10">
+                </div>
+                <button class="btn" onclick="addTask()">添加任务</button>
+            </div>
+            <div id="tasksList"></div>
+        </div>
+        
+        <!-- 每日作业 -->
+        <div class="tab-content" id="tab-homework">
+            <div class="item-card">
+                <h3>📝 发布作业</h3>
+                <div class="form-group">
+                    <input type="text" id="hwTitle" placeholder="科目名称，如：语文">
+                </div>
+                <div class="form-group">
+                    <textarea id="hwContent" placeholder="作业内容..."></textarea>
+                </div>
+                <div class="form-group">
                     <input type="date" id="hwDate">
-                    <button class="btn btn-primary" onclick="addHomework()">📤 发布作业</button>
                 </div>
-                <div class="card">
-                    <h3>📋 已发布作业</h3>
-                    <div id="homeworkList"></div>
+                <button class="btn" onclick="addHomework()">发布作业</button>
+            </div>
+            <div id="homeworkList"></div>
+        </div>
+        
+        <!-- 奖品管理 -->
+        <div class="tab-content" id="tab-prizes">
+            <div class="item-card">
+                <h3>🎁 新增奖品</h3>
+                <div class="form-group">
+                    <input type="text" id="prizeName" placeholder="奖品名称，如：玩手机20分钟">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="prizeCost" placeholder="需要积分" value="50">
+                </div>
+                <button class="btn" onclick="addPrize()">添加奖品</button>
+            </div>
+            <div id="prizesList"></div>
+        </div>
+        
+        <!-- 打卡记录 -->
+        <div class="tab-content" id="tab-records">
+            <div id="recordsList"></div>
+        </div>
+        
+        <!-- 积分管理 -->
+        <div class="tab-content" id="tab-points">
+            <div class="item-card">
+                <h3>💰 当前积分</h3>
+                <p style="font-size:36px;color:#667eea;font-weight:bold;" id="currentPoints">0</p>
+            </div>
+            <div class="item-card">
+                <h3>➕➖ 手动调整积分</h3>
+                <div class="form-group">
+                    <input type="text" id="pointsReason" placeholder="调整原因，如：表现特别好">
+                </div>
+                <div class="points-adjust">
+                    <input type="number" id="pointsAmount" placeholder="积分数值" value="10">
+                    <button class="add-points" onclick="adjustPoints(1)">➕ 增加</button>
+                    <button class="subtract-points" onclick="adjustPoints(-1)">➖ 减少</button>
                 </div>
             </div>
-
-            <!-- 打卡任务 -->
-            <div id="tab-tasks" class="tab-content" style="display:none">
-                <div class="card">
-                    <h3>✅ 添加打卡任务</h3>
-                    <input type="text" id="taskName" placeholder="任务名称，如：背英语单词">
-                    <input type="number" id="taskPoints" placeholder="完成奖励积分" value="10">
-                    <button class="btn btn-primary" onclick="addTask()">➕ 添加任务</button>
-                </div>
-                <div class="card">
-                    <h3>📋 打卡任务列表</h3>
-                    <div id="tasksList"></div>
-                </div>
-            </div>
-
-            <!-- 奖品管理 -->
-            <div id="tab-prizes" class="tab-content" style="display:none">
-                <div class="card">
-                    <h3>🎁 添加奖品</h3>
-                    <input type="text" id="prizeName" placeholder="奖品名称，如：看手机20分钟">
-                    <input type="number" id="prizeCost" placeholder="所需积分" value="50">
-                    <button class="btn btn-primary" onclick="addPrize()">➕ 添加奖品</button>
-                </div>
-                <div class="card">
-                    <h3>🏆 奖品列表</h3>
-                    <div id="prizesList"></div>
-                </div>
-            </div>
-
-            <!-- 学习记录 -->
-            <div id="tab-records" class="tab-content" style="display:none">
-                <div class="card">
-                    <h3>📊 打卡记录</h3>
-                    <div id="tasksLog"></div>
-                </div>
-                <div class="card">
-                    <h3>🎁 兑换记录</h3>
-                    <div id="pointsLog"></div>
-                </div>
+            <div class="item-card">
+                <h3>📜 积分变动记录</h3>
+                <div id="pointsLogList"></div>
             </div>
         </div>
     </div>
-    <script>
-        const API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json?ref=master';
-        const TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
-        let currentSha = '';
-        let data = { homework: [], tasks: [], prizes: [], tasksLog: [], pointsLog: [] };
 
-        function b64toText(b64) {
+    <script>
+        const GITEE_API = 'https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json';
+        const GITEE_TOKEN = '8903f7dbff4a9eabb1d75ce37ba9ec4c';
+        const PARENT_PASSWORD = '123456';
+        
+        let currentChild = 'yiyi';
+        let fileSHA = '';
+        let data = {
+            yiyi: { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [] },
+            xinxin: { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [] }
+        };
+        
+        function base64Decode(b64) {
             const binary = atob(b64);
             const bytes = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
             return new TextDecoder('utf-8').decode(bytes);
         }
-        function textToB64(text) {
-            const bytes = new TextEncoder('utf-8').encode(text);
+        function textToBase64(text) {
+            const bytes = new TextEncoder().encode(text);
             return btoa(String.fromCharCode(...bytes));
         }
-
-        async function loadData() {
-            try {
-                const res = await fetch(API, { headers: { 'Authorization': 'Bearer ' + TOKEN } });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const json = await res.json();
-                currentSha = json.sha;
-                data = JSON.parse(b64toText(json.content));
-                if (!data.homework) data.homework = [];
-                if (!data.tasks) data.tasks = [];
-                if (!data.prizes) data.prizes = [];
-                if (!data.tasksLog) data.tasksLog = [];
-                if (!data.pointsLog) data.pointsLog = [];
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                renderAll();
-            } catch(e) { showError('加载失败：' + e.message); }
+        
+        function doLogin() {
+            const pwd = document.getElementById('passwordInput').value;
+            if (pwd === PARENT_PASSWORD || pwd === 'parent123') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                sessionStorage.setItem('parentLoggedIn', 'true');
+                initApp();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                setTimeout(() => document.getElementById('loginError').style.display = 'none', 2000);
+            }
         }
-
-        async function saveData() {
-            const b64 = textToB64(JSON.stringify(data, null, 2));
-            const body = JSON.stringify({ content: b64, message: '更新学习数据', branch: 'master', sha: currentSha });
+        
+        function initApp() {
+            document.getElementById('hwDate').valueAsDate = new Date();
+            loadFromCloud();
+        }
+        
+        async function loadFromCloud() {
             try {
-                const res = await fetch('https://gitee.com/api/v5/repos/fengwolf3/h5-data/contents/data/learning.json', {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' },
-                    body: body
+                const res = await fetch(GITEE_API + '?ref=master', {
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN }
                 });
-                if (!res.ok) {
-                    const err = await res.text();
-                    throw new Error('保存失败 ' + res.status + ': ' + err.substring(0, 80));
-                }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const result = await res.json();
-                currentSha = result.content.sha;
+                fileSHA = result.sha;
+                const decoded = base64Decode(result.content);
+                const parsed = JSON.parse(decoded);
+                data.yiyi = { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [], ...parsed.yiyi };
+                data.xinxin = { tasksConfig: [], tasksLog: [], pointsConfig: [], pointsLog: [], homework: [], prizes: [], ...parsed.xinxin };
                 renderAll();
-            } catch(e) { showError('保存失败：' + e.message); }
+            } catch(e) {
+                showError('加载失败：' + e.message);
+            }
         }
-
-        function showTab(name) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.getElementById('tab-' + name).style.display = 'block';
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+        
+        async function saveToCloud() {
+            if (!fileSHA) return;
+            try {
+                const jsonStr = JSON.stringify(data, null, 2);
+                const b64 = textToBase64(jsonStr);
+                const res = await fetch(GITEE_API, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + GITEE_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: b64, message: '更新学习数据', branch: 'master', sha: fileSHA })
+                });
+                if (!res.ok) throw new Error('保存失败 ' + res.status);
+                const result = await res.json();
+                fileSHA = result.content.sha;
+                renderAll();
+            } catch(e) {
+                showError('保存失败：' + e.message);
+            }
         }
-
+        
+        function switchChild(child) {
+            currentChild = child;
+            document.querySelectorAll('.child-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', (i === 0 && child === 'yiyi') || (i === 1 && child === 'xinxin'));
+            });
+            renderAll();
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                const tabs = ['tasks', 'homework', 'prizes', 'records', 'points'];
+                t.classList.toggle('active', tabs[i] === tabName);
+            });
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+        
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = '⚠️ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+        
+        function getCD() { return data[currentChild]; }
+        
+        function renderAll() {
+            renderTasks();
+            renderHomework();
+            renderPrizes();
+            renderRecords();
+            renderPoints();
+        }
+        
+        function renderTasks() {
+            const cd = getCD();
+            const container = document.getElementById('tasksList');
+            if (cd.tasksConfig.length === 0) {
+                container.innerHTML = '<div class="empty">暂无打卡任务</div>';
+                return;
+            }
+            container.innerHTML = cd.tasksConfig.map((t, i) => `
+                <div class="item-card">
+                    <h3>${escapeHtml(t.name)}</h3>
+                    <p>💰 积分：${t.points}</p>
+                    <div class="actions">
+                        <button class="btn-danger" onclick="deleteTask(${i})">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderHomework() {
+            const cd = getCD();
+            const container = document.getElementById('homeworkList');
+            if (cd.homework.length === 0) {
+                container.innerHTML = '<div class="empty">暂无作业</div>';
+                return;
+            }
+            container.innerHTML = [...cd.homework].reverse().map((h, i) => `
+                <div class="item-card">
+                    <h3>${escapeHtml(h.title)}</h3>
+                    <p>📅 ${h.date}</p>
+                    <p>${escapeHtml(h.content).substring(0, 50)}...</p>
+                    <div class="actions">
+                        <button class="btn-danger" onclick="deleteHomework(${cd.homework.length - 1 - i})">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderPrizes() {
+            const cd = getCD();
+            const container = document.getElementById('prizesList');
+            if (cd.prizes.length === 0) {
+                container.innerHTML = '<div class="empty">暂无奖品</div>';
+                return;
+            }
+            container.innerHTML = cd.prizes.map((p, i) => `
+                <div class="item-card">
+                    <h3>${escapeHtml(p.name)}</h3>
+                    <p>💰 需要积分：${p.cost}</p>
+                    <div class="actions">
+                        <button class="btn-danger" onclick="deletePrize(${i})">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderRecords() {
+            const cd = getCD();
+            const container = document.getElementById('recordsList');
+            if (cd.tasksLog.length === 0) {
+                container.innerHTML = '<div class="empty">暂无打卡记录</div>';
+                return;
+            }
+            container.innerHTML = [...cd.tasksLog].reverse().map(r => `
+                <div class="item-card">
+                    <h3>${escapeHtml(r.taskName)}</h3>
+                    <p>💰 +${r.points}积分</p>
+                    <p>🕐 ${r.time}</p>
+                </div>
+            `).join('');
+        }
+        
+        function renderPoints() {
+            const cd = getCD();
+            const totalPoints = (cd.tasksLog || []).reduce((sum, r) => sum + r.points, 0) + 
+                               (cd.pointsLog || []).reduce((sum, r) => sum + r.points, 0);
+            document.getElementById('currentPoints').textContent = totalPoints;
+            
+            const container = document.getElementById('pointsLogList');
+            if (cd.pointsLog.length === 0) {
+                container.innerHTML = '<div class="empty">暂无积分调整记录</div>';
+                return;
+            }
+            container.innerHTML = [...cd.pointsLog].reverse().map(r => `
+                <div class="item-card">
+                    <p>${r.points > 0 ? '➕' : '➖'} ${Math.abs(r.points)}积分</p>
+                    <p>📝 ${escapeHtml(r.reason)}</p>
+                    <p>🕐 ${r.time}</p>
+                </div>
+            `).join('');
+        }
+        
+        function addTask() {
+            const name = document.getElementById('taskName').value.trim();
+            const points = parseInt(document.getElementById('taskPoints').value) || 10;
+            if (!name) return showError('请输入任务名称');
+            getCD().tasksConfig.push({ id: Date.now().toString(), name, points });
+            document.getElementById('taskName').value = '';
+            saveToCloud();
+        }
+        
+        function deleteTask(index) {
+            if (confirm('确定删除这个任务？')) {
+                getCD().tasksConfig.splice(index, 1);
+                saveToCloud();
+            }
+        }
+        
         function addHomework() {
             const title = document.getElementById('hwTitle').value.trim();
             const content = document.getElementById('hwContent').value.trim();
             const date = document.getElementById('hwDate').value;
-            if (!title || !content) { showError('请填写完整'); return; }
-            data.homework.unshift({ id: Date.now().toString(), title, content, date, time: new Date().toLocaleString() });
+            if (!title || !content) return showError('请填写完整');
+            getCD().homework.push({ id: Date.now().toString(), title, content, date, time: new Date().toLocaleString() });
             document.getElementById('hwTitle').value = '';
             document.getElementById('hwContent').value = '';
-            saveData();
+            saveToCloud();
         }
-
-        function addTask() {
-            const name = document.getElementById('taskName').value.trim();
-            const points = parseInt(document.getElementById('taskPoints').value) || 10;
-            if (!name) { showError('请填写任务名称'); return; }
-            data.tasks.push({ id: Date.now().toString(), name, points });
-            document.getElementById('taskName').value = '';
-            saveData();
+        
+        function deleteHomework(index) {
+            if (confirm('确定删除这个作业？')) {
+                getCD().homework.splice(index, 1);
+                saveToCloud();
+            }
         }
-
+        
         function addPrize() {
             const name = document.getElementById('prizeName').value.trim();
             const cost = parseInt(document.getElementById('prizeCost').value) || 50;
-            if (!name) { showError('请填写奖品名称'); return; }
-            data.prizes.push({ id: Date.now().toString(), name, cost });
+            if (!name) return showError('请输入奖品名称');
+            getCD().prizes.push({ id: Date.now().toString(), name, cost });
             document.getElementById('prizeName').value = '';
-            saveData();
+            saveToCloud();
         }
-
-        function deleteItem(type, id) {
-            if (!confirm('确定删除吗？')) return;
-            if (type === 'homework') data.homework = data.homework.filter(x => x.id !== id);
-            if (type === 'tasks') data.tasks = data.tasks.filter(x => x.id !== id);
-            if (type === 'prizes') data.prizes = data.prizes.filter(x => x.id !== id);
-            saveData();
+        
+        function deletePrize(index) {
+            if (confirm('确定删除这个奖品？')) {
+                getCD().prizes.splice(index, 1);
+                saveToCloud();
+            }
         }
-
-        function renderAll() {
-            document.getElementById('homeworkList').innerHTML = data.homework.length === 0 ? 
-                '<div style="text-align:center;color:#999;padding:20px">暂无作业</div>' :
-                data.homework.map(h => `
-                    <div class="item">
-                        <div class="item-title">${h.title}</div>
-                        <div class="item-meta">${h.content}<br>📅 ${h.date || '未设置日期'}</div>
-                        <div class="btn-group"><button class="btn delete-btn" onclick="deleteItem('homework','${h.id}')">🗑️ 删除</button></div>
-                    </div>
-                `).join('');
-
-            document.getElementById('tasksList').innerHTML = data.tasks.length === 0 ?
-                '<div style="text-align:center;color:#999;padding:20px">暂无打卡任务</div>' :
-                data.tasks.map(t => `
-                    <div class="item">
-                        <div class="item-title">${t.name}</div>
-                        <div class="item-meta">⭐ 完成奖励 ${t.points} 积分</div>
-                        <div class="btn-group"><button class="btn delete-btn" onclick="deleteItem('tasks','${t.id}')">🗑️ 删除</button></div>
-                    </div>
-                `).join('');
-
-            document.getElementById('prizesList').innerHTML = data.prizes.length === 0 ?
-                '<div style="text-align:center;color:#999;padding:20px">暂无奖品</div>' :
-                data.prizes.map(p => `
-                    <div class="item">
-                        <div class="item-title">${p.name}</div>
-                        <div class="item-meta">🎯 需要 ${p.cost} 积分</div>
-                        <div class="btn-group"><button class="btn delete-btn" onclick="deleteItem('prizes','${p.id}')">🗑️ 删除</button></div>
-                    </div>
-                `).join('');
-
-            document.getElementById('tasksLog').innerHTML = data.tasksLog.length === 0 ?
-                '<div style="text-align:center;color:#999;padding:20px">暂无打卡记录</div>' :
-                data.tasksLog.map(t => `
-                    <div class="item">
-                        <div class="item-title">✅ ${t.taskName}</div>
-                        <div class="item-meta">获得 +${t.points} 积分 | ${t.time}</div>
-                    </div>
-                `).join('');
-
-            document.getElementById('pointsLog').innerHTML = data.pointsLog.length === 0 ?
-                '<div style="text-align:center;color:#999;padding:20px">暂无兑换记录</div>' :
-                data.pointsLog.map(p => `
-                    <div class="item">
-                        <div class="item-title">🎁 ${p.prizeName}</div>
-                        <div class="item-meta">消耗 -${p.cost} 积分 | ${p.time}</div>
-                    </div>
-                `).join('');
+        
+        function adjustPoints(direction) {
+            const amount = parseInt(document.getElementById('pointsAmount').value) || 0;
+            const reason = document.getElementById('pointsReason').value.trim() || '家长手动调整';
+            if (amount <= 0) return showError('请输入有效数值');
+            const finalAmount = amount * direction;
+            getCD().pointsLog.push({
+                id: Date.now().toString(),
+                type: 'admin',
+                reason: reason,
+                points: finalAmount,
+                time: new Date().toLocaleString()
+            });
+            document.getElementById('pointsReason').value = '';
+            saveToCloud();
         }
-
-        function showError(msg) {
-            document.getElementById('error').textContent = '⚠️ ' + msg;
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-
-        loadData();
+        
+        window.addEventListener('load', () => {
+            if (sessionStorage.getItem('parentLoggedIn') === 'true') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                initApp();
+            }
+        });
     </script>
 </body>
 </html>
